@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import datetime
 import os
 from django.db import models
 from django.db.models import permalink
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -197,7 +199,7 @@ class Periodical(models.Model):
     def display_name(self):
         return _(settings.PERIODICALS_PERIODICAL_FORMAT) % _instanceFields(self)
 
-
+@python_2_unicode_compatible
 class Issue(models.Model):
 
     def issue_upload_to(self, filename, suffix):
@@ -260,7 +262,7 @@ class Issue(models.Model):
         unique_together = ("periodical", "volume", "issue", "slug")
         ordering = ('-pub_date',)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s %d.%d %s" % (self.periodical,
                                 self.volume,
                                 self.issue,
@@ -303,7 +305,7 @@ class Issue(models.Model):
         return [link for link in self.links.all()
                 if link.status == LinkItem.STATUS_ACTIVE]
 
-
+@python_2_unicode_compatible
 class Article(models.Model):
 
     def upload_image(self, filename):
@@ -355,10 +357,10 @@ class Article(models.Model):
         verbose_name_plural = _('articles')
         ordering = ['issue', 'page', ]
 
-    def __unicode__(self):
+    def __str__(self):
         # may only have a series name and not a title
         title = self.title
-        return unicode(self.issue) + (title and ' - ' + title or '')
+        return ("%s" % self.issue) + (title and ' - ' + title or '')
 
     @permalink
     def get_absolute_url(self):
