@@ -244,9 +244,12 @@ class Issue(models.Model):
     read_online = models.URLField(_("read online"),
                                   blank=True,
                                   help_text=_("URL to read online issue"))
-    slug = models.SlugField(max_length=200,
-                            help_text=_("Automatically generated when saved"),
-                            blank=True)
+    slug = AutoSlugField(populate_from='display_name',
+                 unique=True,
+                 editable=True,
+                 max_length=200,
+                 help_text=_("Automatically generated when saved"),
+                 blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     links = generic.GenericRelation(LinkItem)
