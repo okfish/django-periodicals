@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-13 20:58+0400\n"
+"POT-Creation-Date: 2014-06-13 21:47+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,7 +56,7 @@ msgstr "отчество"
 
 #: models.py:110
 msgid "last name"
-msgstr ""
+msgstr "фамилия"
 
 #: models.py:112
 msgid "postnomial"
@@ -72,7 +72,7 @@ msgstr "веб-сайт"
 
 #: models.py:120
 msgid "Alternate website for this author"
-msgstr "Алтернативный веб-сайт для этого автора"
+msgstr "Альтернативный веб-сайт для этого автора"
 
 #: models.py:121 models.py:175
 msgid "blog"
@@ -150,7 +150,7 @@ msgstr "выпуск"
 msgid "Title for special issues"
 msgstr "Заголовок для специальных выпусков"
 
-#: models.py:229 models.py:323
+#: models.py:229 models.py:326
 msgid "description"
 msgstr "описание"
 
@@ -158,7 +158,7 @@ msgstr "описание"
 msgid "Upload image of printed issue's cover"
 msgstr "загрузите изображение печатной обложки"
 
-#: models.py:236 models.py:334
+#: models.py:236 models.py:340
 msgid "buy print"
 msgstr "купить печатную версию"
 
@@ -170,7 +170,7 @@ msgstr "URL для покупки печатного номера"
 msgid "Upload image of digital issue's cover"
 msgstr "загрузите изображение обложки для цифровой версии"
 
-#: models.py:243 models.py:337
+#: models.py:243 models.py:343
 msgid "buy digital"
 msgstr "купить цифровую версию журнала"
 
@@ -178,7 +178,7 @@ msgstr "купить цифровую версию журнала"
 msgid "URL to buy digital issue"
 msgstr "URL для покупки цифровой версии"
 
-#: models.py:246 models.py:340
+#: models.py:246 models.py:346
 msgid "read online"
 msgstr "читать онлайн"
 
@@ -186,7 +186,7 @@ msgstr "читать онлайн"
 msgid "URL to read online issue"
 msgstr "URL, чтобы читать онлайн"
 
-#: models.py:253 models.py:351
+#: models.py:253 models.py:357
 msgid "Automatically generated when saved"
 msgstr "автоматически сгенерируется при сохранении"
 
@@ -198,31 +198,43 @@ msgstr "выпуски"
 msgid "series"
 msgstr "рубрики"
 
-#: models.py:326
+#: models.py:323
+msgid "subtitle"
+msgstr "заголовок"
+
+#: models.py:328
+msgid "announce"
+msgstr "анонс"
+
+#: models.py:330
+msgid "content"
+msgstr "содержимое"
+
+#: models.py:332
 msgid "page"
 msgstr "страница"
 
-#: models.py:333
+#: models.py:339
 msgid "Upload image associated with article"
 msgstr "загрузите изображение, ассоциированное со статьей"
 
-#: models.py:336
+#: models.py:342
 msgid "URL to buy print article"
 msgstr "URL для покупки распечатки статьи"
 
-#: models.py:339
+#: models.py:345
 msgid "URL to buy digital article"
 msgstr "URL для покупки цифровой версии статьи"
 
-#: models.py:342
+#: models.py:348
 msgid "URL to read online article"
 msgstr "URL, чтобы прочитать статью онлайн"
 
-#: models.py:356
+#: models.py:362
 msgid "article"
 msgstr "статья"
 
-#: models.py:357
+#: models.py:363
 msgid "articles"
 msgstr "статьи"
 
