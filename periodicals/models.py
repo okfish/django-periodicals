@@ -320,8 +320,14 @@ class Article(models.Model):
                               max_length=100)
     title = models.CharField(_("title"),
                              max_length=200)
+    subtitle = models.CharField(_("subtitle"),
+                             max_length=200,
+			     blank=True)
     description = models.TextField(_("description"),
-                                   max_length=200,
+                                   blank=True)
+    announce = models.TextField(_("announce"),
+				blank=True)
+    content = models.TextField(_("content"),
                                    blank=True)
     page = models.PositiveIntegerField(_("page"),
                                        blank=True,

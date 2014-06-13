@@ -58,6 +58,12 @@ function open_add_link(button){
   <h2>Description</h2>
   <p>{{article.description}}</p>
   {% endif %}
+
+  {% if article.content %}
+  <h2>Content</h2>
+  <div>{{article.content}}</div>
+  {% endif %}
+
   {% if article.read_online %}
   <div class="article-read-online">
     <a class="important-link" href="{{article.read_online}}">Read this article online</a>
