@@ -13,6 +13,9 @@ from django.contrib.contenttypes import generic
 from django.forms.models import model_to_dict
 
 from autoslug.fields import AutoSlugField
+
+from djangocms_text_ckeditor.fields import HTMLField
+
 try:
     # use tagging_autocomplete if it is installed
     from tagging_autocomplete.models import TagAutocompleteField as TagField
@@ -327,7 +330,7 @@ class Article(models.Model):
                                    blank=True)
     announce = models.TextField(_("announce"),
 				blank=True)
-    content = models.TextField(_("content"),
+    content = HTMLField(_("content"),
                                    blank=True)
     page = models.PositiveIntegerField(_("page"),
                                        blank=True,
