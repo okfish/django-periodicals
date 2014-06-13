@@ -52,12 +52,21 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display = ('issue', 'created', 'series', 'page', 'title', 'tags')
     ordering = ('-created',)
     filter_horizontal = ('authors',)
-    search_fields = ['title', 'series', 'description', 'tags']
+    search_fields = ['title', 
+		    'subtitle', 
+		    'series', 
+		    'description', 
+		    'announce', 
+		    'content',
+		    'tags']
     save_on_top = True
     fields = ('issue',
               'series',
               'title',
+	      'subtitle',
               'description',
+	      'announce',
+	      'content',
               'page', 'tags',
               'authors',
               'slug',
