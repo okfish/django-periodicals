@@ -61,7 +61,7 @@ function open_add_link(button){
 
   {% if article.content %}
   <h2>Content</h2>
-  <div>{{article.content}}</div>
+  <div>{{article.content|safe}}</div>
   {% endif %}
 
   {% if article.read_online %}
