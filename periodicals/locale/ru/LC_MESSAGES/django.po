@@ -200,7 +200,7 @@ msgstr "рубрики"
 
 #: models.py:323
 msgid "subtitle"
-msgstr "заголовок"
+msgstr "подзаголовок"
 
 #: models.py:328
 msgid "announce"
