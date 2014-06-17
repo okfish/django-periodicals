@@ -18,7 +18,7 @@ def article_result(article, autoescape=None):
     result = '''<p><div><a href="%s" class="result-title">%s</a></div><div class="article-result-series">%s</div>''' % (
         esc(article.get_absolute_url()),
         esc(article.title),
-        esc(article.series))
+        esc(article.series.full_name))
 
     if article.description:
         result += '''<div class="result-desc">%s</div>''' % esc(article.description)

@@ -13,6 +13,9 @@ from django.contrib.contenttypes import generic
 from django.forms.models import model_to_dict
 
 from autoslug.fields import AutoSlugField
+
+from treebeard.mp_tree import MP_Node
+
 try:
     # use tagging_autocomplete if it is installed
     from tagging_autocomplete.models import TagAutocompleteField as TagField
@@ -83,6 +86,8 @@ class LinkItem(models.Model):
 
     class Meta:
         ordering = ['title']
+        verbose_name = _('link item')
+        verbose_name_plural = _('link items')
 
     def __unicode__(self):
         return self.title
@@ -316,8 +321,11 @@ class Article(models.Model):
                                           file_extension)
         return full_path
 
-    series = models.CharField(_("series"),
-                              max_length=100)
+    series = models.ForeignKey('Series', 
+                               verbose_name=_("series"),
+                               blank=True,
+                               null=True, 
+                               )
     title = models.CharField(_("title"),
                              max_length=200)
     subtitle = models.CharField(_("subtitle"),
@@ -379,6 +387,36 @@ class Article(models.Model):
         return [link for link in self.links.all()
                 if link.status == LinkItem.STATUS_ACTIVE]
 
+# Trying to introduce series as separated model
+@python_2_unicode_compatible
+class Series(MP_Node):
+    """
+    An article series. 
+
+    Uses django-treebeard.
+    """
+    name = models.CharField(_('Name'), max_length=255, db_index=True)
+    
+    _full_name_separator = ' > '
+    
+    class Meta:
+        verbose_name = _('series')
+        verbose_name_plural = _('series')
+
+    def __str__(self):
+        # may only have a series name and not a title
+        return ("%s" % self.name)
+    
+    @property
+    def full_name(self):
+        anc_names = []
+        separator = self._full_name_separator
+        if self.is_root():
+            return self.__str__()
+        for anc in self.get_ancestors().values('name'):
+            anc_names.append(anc['name'])
+        anc_names.append(self.name)
+        return separator.join(anc_names)   
 
 # utilities
 def _instanceFields(instance):

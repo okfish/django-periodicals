@@ -14,7 +14,7 @@ from django.contrib.sites.models import Site
 from tagging.views import TaggedObjectListView
 from captcha.fields import ReCaptchaField
 
-from .models import Author, Periodical, Issue, Article, LinkItem
+from .models import Author, Periodical, Issue, Article, Series, LinkItem
 
 settings.PERIODICALS_PAGINATION = getattr(settings, 'PERIODICALS_PAGINATION', 20)
 settings.PERIODICALS_LINKS_ENABLED = getattr(settings, 'PERIODICALS_LINKS_ENABLED', True)
@@ -51,7 +51,7 @@ class AuthorDetail(ListView):
 
 
 class SeriesList(ListView):
-    model = Article
+    model = Series
     context_object_name = 'series_list'
     template_name = 'periodicals/series_list.html'
     paginate_by = settings.PERIODICALS_PAGINATION
@@ -59,8 +59,8 @@ class SeriesList(ListView):
     def get_queryset(self):
         self.periodical = get_object_or_404(Periodical,
                                             slug=self.kwargs['periodical_slug'])
-        return Article.objects.filter(issue__periodical=self.periodical).\
-            order_by('series').values('series').annotate(series_count=Count('series'))
+        return Series.objects.filter(article__issue__periodical=self.periodical).\
+            annotate(series_count=Count('article'))
 
     def get_context_data(self, **kwargs):
         context = super(SeriesList, self).get_context_data(**kwargs)
@@ -77,7 +77,7 @@ class SeriesDetail(ListView):
     def get_queryset(self):
         self.periodical = get_object_or_404(Periodical,
                                             slug=self.kwargs['periodical_slug'])
-        self.series = self.kwargs['series']
+        self.series = get_object_or_404(Series, pk=self.kwargs['series'])
         return Article.objects.filter(issue__periodical=self.periodical).\
             filter(series=self.series).\
             select_related().order_by('-issue__pub_date')
@@ -85,7 +85,7 @@ class SeriesDetail(ListView):
     def get_context_data(self, **kwargs):
         context = super(SeriesDetail, self).get_context_data(**kwargs)
         context['periodical'] = self.periodical
-        context['series'] = self.series
+        context['series'] = self.series.full_name
         return context
 
 
