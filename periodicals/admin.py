@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from django.contrib.contenttypes import generic
-from .models import Author, Periodical, Issue, Article, LinkItem
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
+from django.forms import TypedChoiceField
 
+from treebeard.admin import TreeAdmin
+from treebeard.forms import movenodeform_factory
+
+
+from .models import Author, Periodical, Issue, Article, Series, LinkItem
+from .forms import ArticleCreateUpdateForm
 
 class AuthorAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':
@@ -49,6 +57,7 @@ class IssueAdmin(admin.ModelAdmin):
 
 
 class ArticleAdmin(admin.ModelAdmin):
+    form = ArticleCreateUpdateForm
     list_display = ('issue', 'created', 'series', 'page', 'title', 'tags')
     ordering = ('-created',)
     filter_horizontal = ('authors',)
@@ -63,10 +72,10 @@ class ArticleAdmin(admin.ModelAdmin):
     fields = ('issue',
               'series',
               'title',
-	      'subtitle',
+	          'subtitle',
               'description',
-	      'announce',
-	      'content',
+	          'announce',
+	          'content',
               'page', 'tags',
               'authors',
               'slug',
@@ -78,9 +87,12 @@ class ArticleAdmin(admin.ModelAdmin):
         LinkItemInline
     ]
 
+class SeriesAdmin(TreeAdmin):
+        form = movenodeform_factory(Series)
 
 admin.site.register(LinkItem, LinkItemAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(Periodical, PeriodicalAdmin)
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Article, ArticleAdmin)
+admin.site.register(Series, SeriesAdmin)
