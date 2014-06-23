@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-23 22:35+0400\n"
+"POT-Creation-Date: 2014-06-23 23:00+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,9 +27,8 @@ msgid "-- root --"
 msgstr "-- корень --"
 
 #: models.py:71
-#, fuzzy
 msgid "content type"
-msgstr "содержимое"
+msgstr "тип содержимого"
 
 #: models.py:74
 msgid "status"
@@ -179,9 +178,13 @@ msgstr "номер"
 msgid "issue"
 msgstr "выпуск"
 
+#: models.py:230
+msgid "Date published"
+msgstr "дата публикации"
+
 #: models.py:234
 msgid "Title for special issues"
-msgstr "Заголовок для специальных выпусков"
+msgstr "заголовок для специальных выпусков"
 
 #: models.py:235 models.py:339
 msgid "description"
