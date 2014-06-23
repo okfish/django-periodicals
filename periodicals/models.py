@@ -272,10 +272,11 @@ class Issue(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return "%s %d.%d %s" % (self.periodical,
-                                self.volume,
-                                self.issue,
-                                self.pub_date.strftime("%Y-%b"))
+        format_str ="%(periodical)s " + settings.PERIODICALS_ISSUE_FORMAT + " %(pub_date)s"
+        return format_str % {'periodical' : self.periodical,
+                             'volume' : self.volume,
+                             'issue' : self.issue,
+                             'pub_date' : self.pub_date.strftime("%Y-%b")}
 
     @permalink
     def get_absolute_url(self):
