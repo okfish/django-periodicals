@@ -3,17 +3,26 @@
 from django import forms
 from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm, ErrorList, model_to_dict
+from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
+from django.contrib.admin.sites import AdminSite
 #from django.forms.models import modelform_factory as django_modelform_factory
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Series
+from .models import Series, Article
 
 class ArticleCreateUpdateForm(forms.ModelForm):
     
     series = forms.TypedChoiceField(required=False,
                               coerce=int,
-                              label=_("series"))
+                              label=_("series"),
+                              widget=RelatedFieldWidgetWrapper(
+                                                Article._meta.get_field('series').formfield().widget,
+                                                Article._meta.get_field('series').rel,
+                                                AdminSite(),
+                                                can_add_related=True               
+                                                ),
+                              )
 
 # Trying to steal some django-treebeard methods
 # to generate tree-like select options     
