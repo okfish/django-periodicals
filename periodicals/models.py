@@ -221,7 +221,7 @@ class Issue(models.Model):
     periodical = models.ForeignKey('Periodical', verbose_name=_('periodical'))
     volume = models.PositiveIntegerField(_("volume"))
     issue = models.PositiveIntegerField(_("issue"))
-    pub_date = models.DateField(default=datetime.datetime.now)
+    pub_date = models.DateField(default=datetime.datetime.now,  verbose_name=_('Date published'))
     title = models.CharField(_("title"),
                              max_length=100,
                              blank=True,
