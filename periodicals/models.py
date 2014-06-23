@@ -164,7 +164,7 @@ class Periodical(models.Model):
 
     def logo_upload(self, filename):
         filename, file_extension = os.path.splitext(filename)
-        name = self.name.lower().replace(' ', '')
+        name = self.slug.lower()
         full_path = "%s/logo%s" % (name, file_extension)
         return full_path
 
@@ -211,7 +211,7 @@ class Issue(models.Model):
     def issue_upload_to(self, filename, suffix):
         filename, file_extension = os.path.splitext(filename)
         full_path = "%s/issues/%s-%s-%s%s" % (
-            self.periodical.name.lower().replace(' ', ''),
+            self.periodical.slug.lower(),
             self.display_year(),
             self.display_month() or slugify(self.title),
             suffix,
@@ -320,7 +320,7 @@ class Article(models.Model):
 
     def upload_image(self, filename):
         filename, file_extension = os.path.splitext(filename)
-        periodical = self.issue.periodical.name.lower().replace(' ', '')
+        periodical = self.issue.periodical.slug.lower()
         full_path = "%s/articles/%s%s" % (periodical,
                                           self.slug.lower(),
                                           file_extension)
