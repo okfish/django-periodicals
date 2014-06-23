@@ -68,7 +68,7 @@ class LinkItem(models.Model):
         (STATUS_DELETED, 'Deleted'),
     )
 
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, verbose_name=_('content type'))
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey()
     status = models.CharField(verbose_name=_('status'),
@@ -78,8 +78,8 @@ class LinkItem(models.Model):
 
     url = models.URLField(_("url"), blank=True)
     title = models.CharField(_("title"), max_length=200, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True, verbose_name=_('Date created'))
+    modified = models.DateTimeField(auto_now=True, verbose_name=_('Date modified'))
 
     # Define first so admin shows all regardless of status
     objects = models.Manager()
@@ -127,7 +127,7 @@ class Author(models.Model):
     blog = models.URLField(_("blog"), blank=True)
     email = models.EmailField(_("email"), blank=True)
     slug = models.SlugField(_("slug"), max_length=200, unique=True)
-    modified = models.DateTimeField(auto_now=True)
+    modified = models.DateTimeField(auto_now=True, verbose_name=_('Date modified'))
 
     class Meta:
         verbose_name = _('author')
@@ -177,7 +177,7 @@ class Periodical(models.Model):
     country = models.CharField(_("country"), max_length=100, blank=True)
     zipcode = models.CharField(_("zipcode"), max_length=10, blank=True)
     website = models.URLField(_("website"), blank=True)
-    logo = models.ImageField(upload_to=logo_upload, blank=True, max_length=200)
+    logo = models.ImageField(upload_to=logo_upload, blank=True, max_length=200, verbose_name=_('Logo image'))
     blog = models.URLField(_("blog"), blank=True)
     email = models.EmailField(_("email"), blank=True)
     phone = models.CharField(_("phone"), max_length=20, blank=True)
@@ -224,7 +224,7 @@ class Issue(models.Model):
     def issue_upload_digital(self, filename):
         return self.issue_upload_to(filename, "digital")
 
-    periodical = models.ForeignKey('Periodical')
+    periodical = models.ForeignKey('Periodical', verbose_name=_('periodical'))
     volume = models.PositiveIntegerField(_("volume"))
     issue = models.PositiveIntegerField(_("issue"))
     pub_date = models.DateField(default=datetime.datetime.now)
@@ -238,6 +238,7 @@ class Issue(models.Model):
     printed_cover = models.ImageField(upload_to=issue_upload_print,
                                       blank=True,
                                       max_length=200,
+                                      verbose_name=_('printed cover'),
                                       help_text=_("Upload image of printed issue's cover"))
     buy_print = models.URLField(_("buy print"),
                                 blank=True,
@@ -245,6 +246,7 @@ class Issue(models.Model):
     digital_cover = models.ImageField(upload_to=issue_upload_digital,
                                       blank=True,
                                       max_length=200,
+                                      verbose_name=_('digital cover'),
                                       help_text=_("Upload image of digital issue's cover"))
     buy_digital = models.URLField(_("buy digital"),
                                   blank=True,
@@ -256,10 +258,11 @@ class Issue(models.Model):
                  unique=True,
                  editable=True,
                  max_length=200,
+                 verbose_name=_('slug'),
                  help_text=_("Automatically generated when saved"),
                  blank=True)
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True, verbose_name=_('Date created'))
+    modified = models.DateTimeField(auto_now=True, verbose_name=_('Date modified'))
     links = generic.GenericRelation(LinkItem)
 
     class Meta:
@@ -341,10 +344,11 @@ class Article(models.Model):
     page = models.PositiveIntegerField(_("page"),
                                        blank=True,
                                        null=True)
-    tags = TagField()
+    tags = TagField(verbose_name=_('tags'))
     image = models.ImageField(upload_to=upload_image,
                               blank=True,
                               max_length=200,
+                              verbose_name=_('image'),
                               help_text=_("Upload image associated with article"))
     buy_print = models.URLField(_("buy print"),
                                 blank=True,
@@ -355,14 +359,15 @@ class Article(models.Model):
     read_online = models.URLField(_("read online"),
                                   blank=True,
                                   help_text=_("URL to read online article"))
-    issue = models.ForeignKey('Issue', related_name='articles')
-    authors = models.ManyToManyField('Author', related_name='articles')
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    issue = models.ForeignKey('Issue', related_name='articles', verbose_name=_('issue'))
+    authors = models.ManyToManyField('Author', related_name='articles', verbose_name=_('authors'))
+    created = models.DateTimeField(auto_now_add=True, verbose_name=_('Date created'))
+    modified = models.DateTimeField(auto_now=True, verbose_name=_('Date modified'))
     slug = AutoSlugField(max_length=200,
                          populate_from='title',
                          unique=True,
                          editable=True,
+                         verbose_name=_('slug'),
                          help_text=_("Automatically generated when saved"),
                          blank=True)
     links = generic.GenericRelation(LinkItem)
