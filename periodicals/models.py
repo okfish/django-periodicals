@@ -7,6 +7,7 @@ from django.db.models import permalink
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 from django.template.defaultfilters import slugify
+from django.template.defaultfilters import date as _date
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -276,7 +277,7 @@ class Issue(models.Model):
         return format_str % {'periodical' : self.periodical,
                              'volume' : self.volume,
                              'issue' : self.issue,
-                             'pub_date' : self.pub_date.strftime("%Y-%b")}
+                             'pub_date' : _date(self.pub_date, "b. Y")}
 
     @permalink
     def get_absolute_url(self):
