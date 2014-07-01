@@ -48,9 +48,9 @@ function open_add_link(button){
     <li><a href="{{author.get_absolute_url}}">{{author.display_name}}</a></li>
     {% endfor %}
   </ul>
-  {% if article.image %}
+  {% if article.article_image %}
   <div class="article-image">
-    <img src="/{{article.image}}" />
+    <img src="/{{article.article_image}}" />
   </div>
   {% endif %}
 

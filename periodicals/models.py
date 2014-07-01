@@ -14,7 +14,7 @@ from django.contrib.contenttypes import generic
 from django.forms.models import model_to_dict
 
 from autoslug.fields import AutoSlugField
-
+from filer.fields.image import FilerImageField
 from djangocms_text_ckeditor.fields import HTMLField
 from treebeard.mp_tree import MP_Node
 
@@ -178,7 +178,10 @@ class Periodical(models.Model):
     country = models.CharField(_("country"), max_length=100, blank=True)
     zipcode = models.CharField(_("zipcode"), max_length=10, blank=True)
     website = models.URLField(_("website"), blank=True)
-    logo = models.ImageField(upload_to=logo_upload, blank=True, max_length=200, verbose_name=_('Logo image'))
+    logo = FilerImageField(null=True, 
+                           blank=True, 
+                           verbose_name=_('logo image'),
+                           help_text=_("Upload logo image of the periodical"))
     blog = models.URLField(_("blog"), blank=True)
     email = models.EmailField(_("email"), blank=True)
     phone = models.CharField(_("phone"), max_length=20, blank=True)
@@ -236,19 +239,21 @@ class Issue(models.Model):
     description = models.TextField(_("description"),
                                    max_length=200,
                                    blank=True)
-    printed_cover = models.ImageField(upload_to=issue_upload_print,
-                                      blank=True,
-                                      max_length=200,
-                                      verbose_name=_('printed cover'),
-                                      help_text=_("Upload image of printed issue's cover"))
+    printed_cover = FilerImageField(null=True, 
+                                    blank=True, 
+                                    verbose_name=_('printed cover'),
+                                    related_name='issue_printed_covers',
+                                    help_text=_("Upload image of printed issue's cover")) 
+
     buy_print = models.URLField(_("buy print"),
                                 blank=True,
                                 help_text=_("URL to buy print issue"))
-    digital_cover = models.ImageField(upload_to=issue_upload_digital,
-                                      blank=True,
-                                      max_length=200,
-                                      verbose_name=_('digital cover'),
-                                      help_text=_("Upload image of digital issue's cover"))
+    digital_cover = FilerImageField(null=True, 
+                                    blank=True, 
+                                    verbose_name=_('digital cover'),
+                                    related_name='issue_digital_covers',
+                                    help_text=_("Upload image of digital issue's cover")) 
+
     buy_digital = models.URLField(_("buy digital"),
                                   blank=True,
                                   help_text=_("URL to buy digital issue"))
@@ -347,11 +352,12 @@ class Article(models.Model):
                                        blank=True,
                                        null=True)
     tags = TagField(verbose_name=_('tags'))
-    image = models.ImageField(upload_to=upload_image,
-                              blank=True,
-                              max_length=200,
-                              verbose_name=_('image'),
-                              help_text=_("Upload image associated with article"))
+    article_image = FilerImageField(null=True, 
+                            blank=True, 
+                            verbose_name=_('article image'),
+                            related_name='article_images',
+                            help_text=_('Choose or upload image associated with article'))
+    
     buy_print = models.URLField(_("buy print"),
                                 blank=True,
                                 help_text=_("URL to buy print article"))
