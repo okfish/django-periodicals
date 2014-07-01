@@ -7,3 +7,6 @@ django-haystack==2.1.0
 # makes obsolete django-tagging work with Django 1.5
 -e git://github.com/nemith/django-tagging.git@dev-django1.5#egg=django_tagging-dev
 
+easy_thumbnails
+django-smart-load-tag
+

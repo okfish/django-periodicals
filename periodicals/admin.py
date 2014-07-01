@@ -79,7 +79,7 @@ class ArticleAdmin(admin.ModelAdmin):
               'page', 'tags',
               'authors',
               'slug',
-              'article_image',
+              'image',
               'buy_print',
               'buy_digital',
               'read_online')

@@ -350,9 +350,10 @@ class Article(models.Model):
                                    blank=True)
     page = models.PositiveIntegerField(_("page"),
                                        blank=True,
-                                       null=True)
+                                       null=True,
+                                       help_text=_('Page number'))
     tags = TagField(verbose_name=_('tags'))
-    article_image = FilerImageField(null=True, 
+    image = FilerImageField(null=True, 
                             blank=True, 
                             verbose_name=_('article image'),
                             related_name='article_images',

@@ -1,6 +1,7 @@
 {% extends "periodicals/base_periodical.html" %}
 {% load tagging_tags %}
-
+{% load smart_load %}
+{% load thumbnail from easy_thumbnails %}
 {% block title %}{{block.super}} - {{periodical.name}} - {{issue.display_year}} - {{issue.display_name}} - {{article.title}}{% endblock %}
 
 {% block javascript %}
@@ -48,9 +49,9 @@ function open_add_link(button){
     <li><a href="{{author.get_absolute_url}}">{{author.display_name}}</a></li>
     {% endfor %}
   </ul>
-  {% if article.article_image %}
+  {% if article.image %}
   <div class="article-image">
-    <img src="/{{article.article_image}}" />
+    <img src="{% thumbnail article.image 50x50 crop %}" />
   </div>
   {% endif %}
 
