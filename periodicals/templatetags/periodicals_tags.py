@@ -14,11 +14,13 @@ def article_result(article, autoescape=None):
         esc = conditional_escape
     else:
         esc = lambda x: x
-
+    series_full_name = '-'
+    if hasattr(article.series, 'full_name'):
+        series_full_name =  article.series.full_name 
     result = '''<p><div><a href="%s" class="result-title">%s</a></div><div class="article-result-series">%s</div>''' % (
         esc(article.get_absolute_url()),
         esc(article.title),
-        esc(article.series.full_name))
+        esc(series_full_name))
 
     if article.description:
         result += '''<div class="result-desc">%s</div>''' % esc(article.description)
