@@ -9,6 +9,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.template.defaultfilters import slugify
 from django.template.defaultfilters import date as _date
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.forms.models import model_to_dict
@@ -64,9 +65,9 @@ class LinkItem(models.Model):
     STATUS_ACTIVE = 'A'
     STATUS_DELETED = 'D'
     STATUS_CHOICES = (
-        (STATUS_SUBMITTED, 'Submitted'),
-        (STATUS_ACTIVE, 'Active'),
-        (STATUS_DELETED, 'Deleted'),
+        (STATUS_SUBMITTED, _('Submitted')),
+        (STATUS_ACTIVE, _('Active')),
+        (STATUS_DELETED, _('Deleted')),
     )
 
     content_type = models.ForeignKey(ContentType, verbose_name=_('content type'))
@@ -112,14 +113,21 @@ class Author(models.Model):
     first_name = models.CharField(_("first name"),
                                   max_length=100)
     middle_name = models.CharField(_("middle name"),
-                                   max_length=50,
+                                   max_length=100,
                                    blank=True)
     last_name = models.CharField(_("last name"),
                                  max_length=100)
     postnomial = models.CharField(_("postnomial"),
-                                  max_length=100,
+                                  max_length=200,
                                   blank=True,
                                   help_text=_("i.e. PhD, DVM"))
+    user = models.OneToOneField(User,
+                                unique=True,
+                                null=True,
+                                blank=True,
+                                verbose_name=_('user'),
+                                related_name='author_profile',
+                                help_text=_("Link to the existing username or create a new one"))
     website = models.URLField(_("website"),
                               blank=True)
     alt_website = models.URLField(_("website"),
@@ -129,7 +137,24 @@ class Author(models.Model):
     email = models.EmailField(_("email"), blank=True)
     slug = models.SlugField(_("slug"), max_length=200, unique=True)
     modified = models.DateTimeField(auto_now=True, verbose_name=_('Date modified'))
-
+    
+    image = FilerImageField(null=True, 
+                            blank=True, 
+                            verbose_name=_('author image'),
+                            related_name='author_images',
+                            help_text=_('Choose or upload your portrait or other picture'))
+    organisation = models.CharField(_("organisation"),
+                                  max_length=200,
+                                  blank=True,
+                                  help_text=_("Current organisation name (if no partner's profile linked)"))
+    position = models.CharField(_("position"),
+                                  max_length=200,
+                                  blank=True,
+                                  help_text=_("Position in the current organisation"))
+    comment = models.TextField(_("comment"),
+                                   max_length=200,
+                                   blank=True,
+                                   help_text=_("Comment, e.g. for internal usage"))
     class Meta:
         verbose_name = _('author')
         verbose_name_plural = _('authors')

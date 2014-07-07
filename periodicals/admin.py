@@ -25,6 +25,15 @@ class AuthorAdmin(admin.ModelAdmin):
                     'website',
                     'blog',
                     'alt_website')
+    fields = ('user',
+              'email',
+              'image',
+              ('first_name','middle_name','last_name',),
+              'postnomial',
+              ('website', 'alt_website', 'blog',),
+              ('organisation','position',),
+              'comment',
+              'slug',)
     ordering = ('last_name', 'first_name')
     search_fields = ['last_name']
     save_on_top = True
