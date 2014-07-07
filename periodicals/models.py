@@ -237,6 +237,15 @@ class Periodical(models.Model):
 @python_2_unicode_compatible
 class Issue(models.Model):
 
+    STATUS_DRAFT = 'D'
+    STATUS_PREPRINT = 'P'
+    STATUS_PUBLISHED = 'U'
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, _('Draft')),
+        (STATUS_PREPRINT, _('Preprint')),
+        (STATUS_PUBLISHED, _('Published')),
+    )
+
     def issue_upload_to(self, filename, suffix):
         filename, file_extension = os.path.splitext(filename)
         full_path = "%s/issues/%s-%s-%s%s" % (
@@ -252,7 +261,11 @@ class Issue(models.Model):
 
     def issue_upload_digital(self, filename):
         return self.issue_upload_to(filename, "digital")
-
+    
+    status = models.CharField(verbose_name=_('status'),
+                              max_length=1,
+                              choices=STATUS_CHOICES,
+                              default=STATUS_DRAFT)
     periodical = models.ForeignKey('Periodical', verbose_name=_('periodical'))
     volume = models.PositiveIntegerField(_("volume"))
     issue = models.PositiveIntegerField(_("issue"))
@@ -261,9 +274,7 @@ class Issue(models.Model):
                              max_length=100,
                              blank=True,
                              help_text=_("Title for special issues"))
-    description = models.TextField(_("description"),
-                                   max_length=200,
-                                   blank=True)
+    description = HTMLField(_("description"), blank=True)
     printed_cover = FilerImageField(null=True, 
                                     blank=True, 
                                     verbose_name=_('printed cover'),
