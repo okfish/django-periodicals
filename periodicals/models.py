@@ -487,6 +487,14 @@ class Series(MP_Node):
     Uses django-treebeard.
     """
     name = models.CharField(_('Name'), max_length=255, db_index=True)
+    description = HTMLField(_("description"), blank=True)
+    image = FilerImageField(null=True, 
+                            blank=True, 
+                            verbose_name=_('series image'),
+                            related_name='series_images',
+                            help_text=_('Choose or upload image associated with the series'))
+    is_commercial = models.BooleanField(_('commercial'), default=False,
+                                        help_text=_('All articles in the series are commercial or advertising'))
     
     _full_name_separator = ' > '
     
