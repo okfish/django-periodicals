@@ -31,7 +31,7 @@ class AuthorAdmin(admin.ModelAdmin):
               ('first_name','middle_name','last_name',),
               'postnomial',
               ('website', 'alt_website', 'blog',),
-              ('organisation','position',),
+              ('organization','position',),
               'comment',
               'slug',)
     ordering = ('last_name', 'first_name')
