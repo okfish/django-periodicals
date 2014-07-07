@@ -14,7 +14,7 @@ from django.contrib.sites.models import Site
 from tagging.views import TaggedObjectListView
 from captcha.fields import ReCaptchaField
 
-from .models import Author, Periodical, Issue, Article, Series, LinkItem
+from .models import Author, Periodical, Issue, Article, Series, LinkItem, STATUS_HIDDEN, STATUS_DRAFT
 
 settings.PERIODICALS_PAGINATION = getattr(settings, 'PERIODICALS_PAGINATION', 20)
 settings.PERIODICALS_LINKS_ENABLED = getattr(settings, 'PERIODICALS_LINKS_ENABLED', True)
@@ -42,6 +42,7 @@ class AuthorDetail(ListView):
                                         slug=self.kwargs['author_slug'])
 
         return Article.objects.filter(authors__in=(self.author.id,)).\
+            exclude(status__in=(STATUS_HIDDEN, STATUS_DRAFT)).\
             select_related().order_by('-issue__pub_date')
 
     def get_context_data(self, **kwargs):

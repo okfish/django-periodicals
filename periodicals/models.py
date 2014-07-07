@@ -15,7 +15,7 @@ from django.contrib.contenttypes import generic
 from django.forms.models import model_to_dict
 
 from autoslug.fields import AutoSlugField
-from filer.fields.image import FilerImageField
+from filer.fields.image import FilerImageField, FilerFileField
 from djangocms_text_ckeditor.fields import HTMLField
 from treebeard.mp_tree import MP_Node
 
@@ -46,6 +46,35 @@ settings.PERIODICALS_ISSUE_FORMAT = \
 settings.PERIODICALS_ISSUE_SLUG_FORMAT = \
     getattr(settings, "PERIODICALS_ISSUE_SLUG_FORMAT", "%(volume)s %(issue)s")
 
+
+STATUS_SUBMITTED = 'S'
+STATUS_ACTIVE = 'A'
+STATUS_DELETED = 'D'
+STATUS_DRAFT = 'F'
+STATUS_HIDDEN = 'H'
+STATUS_PREPRINT = 'P'
+STATUS_ANNOUNCED = 'N'
+STATUS_PUBLISHED = 'U'
+
+LINK_STATUS_CHOICES = (
+    (STATUS_SUBMITTED, _('Submitted')),
+    (STATUS_ACTIVE, _('Active')),
+    (STATUS_DELETED, _('Deleted')),
+)
+
+
+ARTICLE_STATUS_CHOICES = (
+    (STATUS_DRAFT, _('Draft')),
+    (STATUS_HIDDEN, _('Hidden')),
+    (STATUS_ANNOUNCED, _('Announced')),
+    (STATUS_PUBLISHED, _('Published')),
+)
+
+ISSUE_STATUS_CHOICES = (
+    (STATUS_DRAFT, _('Draft')),
+    (STATUS_PREPRINT, _('Preprint')),
+    (STATUS_PUBLISHED, _('Published')),
+)
 
 class ActiveLinkManager(models.Manager):
     def get_query_set(self):
@@ -143,14 +172,14 @@ class Author(models.Model):
                             verbose_name=_('author image'),
                             related_name='author_images',
                             help_text=_('Choose or upload your portrait or other picture'))
-    organisation = models.CharField(_("organisation"),
+    organization = models.CharField(_("organization"),
                                   max_length=200,
                                   blank=True,
-                                  help_text=_("Current organisation name (if no partner's profile linked)"))
+                                  help_text=_("Current organization name (if no partner's profile linked)"))
     position = models.CharField(_("position"),
                                   max_length=200,
                                   blank=True,
-                                  help_text=_("Position in the current organisation"))
+                                  help_text=_("Position in the current organization"))
     comment = models.TextField(_("comment"),
                                    max_length=200,
                                    blank=True,
@@ -237,15 +266,6 @@ class Periodical(models.Model):
 @python_2_unicode_compatible
 class Issue(models.Model):
 
-    STATUS_DRAFT = 'D'
-    STATUS_PREPRINT = 'P'
-    STATUS_PUBLISHED = 'U'
-    STATUS_CHOICES = (
-        (STATUS_DRAFT, _('Draft')),
-        (STATUS_PREPRINT, _('Preprint')),
-        (STATUS_PUBLISHED, _('Published')),
-    )
-
     def issue_upload_to(self, filename, suffix):
         filename, file_extension = os.path.splitext(filename)
         full_path = "%s/issues/%s-%s-%s%s" % (
@@ -264,7 +284,7 @@ class Issue(models.Model):
     
     status = models.CharField(verbose_name=_('status'),
                               max_length=1,
-                              choices=STATUS_CHOICES,
+                              choices=ISSUE_STATUS_CHOICES,
                               default=STATUS_DRAFT)
     periodical = models.ForeignKey('Periodical', verbose_name=_('periodical'))
     volume = models.PositiveIntegerField(_("volume"))
@@ -360,6 +380,7 @@ class Issue(models.Model):
 @python_2_unicode_compatible
 class Article(models.Model):
 
+
     def upload_image(self, filename):
         filename, file_extension = os.path.splitext(filename)
         periodical = self.issue.periodical.slug.lower()
@@ -368,6 +389,10 @@ class Article(models.Model):
                                           file_extension)
         return full_path
 
+    status = models.CharField(verbose_name=_('status'),
+                              max_length=1,
+                              choices=ARTICLE_STATUS_CHOICES,
+                              default=STATUS_DRAFT)
     series = models.ForeignKey('Series', 
                                verbose_name=_("series"),
                                blank=True,
@@ -378,16 +403,13 @@ class Article(models.Model):
     subtitle = models.CharField(_("subtitle"),
                              max_length=200,
 			     blank=True)
-    description = models.TextField(_("description"),
-                                   blank=True)
-    announce = models.TextField(_("announce"),
-				blank=True)
-    content = HTMLField(_("content"),
-                                   blank=True)
+    description = HTMLField(_("description"), blank=True)
+    announce = models.TextField(_("announce"), blank=True)
+    content = HTMLField(_("content"), blank=True)
     page = models.PositiveIntegerField(_("page"),
                                        blank=True,
                                        null=True,
-                                       help_text=_('Page number'))
+                                       help_text=_('Page number in the printed issue'))
     tags = TagField(verbose_name=_('tags'))
     image = FilerImageField(null=True, 
                             blank=True, 
@@ -404,8 +426,23 @@ class Article(models.Model):
     read_online = models.URLField(_("read online"),
                                   blank=True,
                                   help_text=_("URL to read online article"))
+    digital_version = FilerFileField(null=True, 
+                                    blank=True, 
+                                    verbose_name=_('digital version'),
+                                    related_name='article_digital_versions',
+                                    help_text=_("Upload PDF or any downloadable format of the article"))
     issue = models.ForeignKey('Issue', related_name='articles', verbose_name=_('issue'))
-    authors = models.ManyToManyField('Author', related_name='articles', verbose_name=_('authors'))
+    authors = models.ManyToManyField('Author', 
+                                     blank=True,
+                                     related_name='articles', 
+                                     verbose_name=_('authors'))
+    organization = models.CharField(_("organization"),
+                                  max_length=200,
+                                  blank=True,
+                                  help_text=_("Organization or company related to the article"
+                                              " in any way or has the rights on it"))
+    is_commercial = models.BooleanField(_('commercial'), default=False,
+                                        help_text=_('Commercial or advertising article'))
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('Date created'))
     modified = models.DateTimeField(auto_now=True, verbose_name=_('Date modified'))
     slug = AutoSlugField(max_length=200,
@@ -416,7 +453,10 @@ class Article(models.Model):
                          help_text=_("Automatically generated when saved"),
                          blank=True)
     links = generic.GenericRelation(LinkItem)
-
+    comment = models.TextField(_("comment"),
+                                   max_length=200,
+                                   blank=True,
+                                   help_text=_("Comment, e.g. for internal usage"))
     class Meta:
         verbose_name = _('article')
         verbose_name_plural = _('articles')

@@ -78,20 +78,31 @@ class ArticleAdmin(admin.ModelAdmin):
 		    'content',
 		    'tags']
     save_on_top = True
-    fields = ('issue',
-              'series',
-              'title',
-	          'subtitle',
-              'description',
-	          'announce',
-	          'content',
-              'page', 'tags',
-              'authors',
-              'slug',
-              'image',
-              'buy_print',
-              'buy_digital',
-              'read_online')
+
+    fieldsets = (
+        (_('Article'), {
+            'fields': (('issue','status',),
+                       ('title','series',), 
+                       ('subtitle','image',), 
+                       'description', 
+                       'content', 
+                       )}),
+        (_('Publication'), {
+            'fields': ('announce', 
+                       'authors',
+                       ('organization', 'is_commercial'),
+                       ('tags', 'slug'),
+                       ),
+            'classes': ('collapse', 'collapse-closed')}),
+        (_('Extra'), {
+            'fields': ('buy_print', 
+                       'buy_digital',
+                       'read_online',
+                       'digital_version',
+                       'comment',),
+            'classes': ('collapse', 'collapse-closed')}),
+                 )
+
     inlines = [
         LinkItemInline
     ]
