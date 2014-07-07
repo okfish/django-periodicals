@@ -139,7 +139,7 @@ class Migration(SchemaMigration):
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'middle_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'organisation': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
+            'organization': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'position': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'postnomial': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '200'}),

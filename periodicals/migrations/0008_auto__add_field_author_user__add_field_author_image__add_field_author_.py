@@ -18,8 +18,8 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name=u'author_images', null=True, to=orm['filer.Image']),
                       keep_default=False)
 
-        # Adding field 'Author.organisation'
-        db.add_column(u'periodicals_author', 'organisation',
+        # Adding field 'Author.organization'
+        db.add_column(u'periodicals_author', 'organization',
                       self.gf('django.db.models.fields.CharField')(default='', max_length=200, blank=True),
                       keep_default=False)
 
@@ -47,8 +47,8 @@ class Migration(SchemaMigration):
         # Deleting field 'Author.image'
         db.delete_column(u'periodicals_author', 'image_id')
 
-        # Deleting field 'Author.organisation'
-        db.delete_column(u'periodicals_author', 'organisation')
+        # Deleting field 'Author.organization'
+        db.delete_column(u'periodicals_author', 'organization')
 
         # Deleting field 'Author.position'
         db.delete_column(u'periodicals_author', 'position')
@@ -177,7 +177,7 @@ class Migration(SchemaMigration):
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'middle_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'organisation': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
+            'organization': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'position': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'postnomial': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '200'}),
