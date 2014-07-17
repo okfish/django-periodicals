@@ -399,13 +399,14 @@ class Article(models.Model):
                                null=True, 
                                )
     title = models.CharField(_("title"),
-                             max_length=200)
+                             max_length=255)
     subtitle = models.CharField(_("subtitle"),
-                             max_length=200,
-			     blank=True)
-    description = HTMLField(_("description"), blank=True)
-    announce = models.TextField(_("announce"), blank=True)
-    content = HTMLField(_("content"), blank=True)
+                             max_length=255,
+                             null=True,
+			                 blank=True)
+    description = HTMLField(_("description"), blank=True, null=True)
+    announce = models.TextField(_("announce"), blank=True, null=True)
+    content = HTMLField(_("content"), blank=True, null=True)
     page = models.PositiveIntegerField(_("page"),
                                        blank=True,
                                        null=True,
@@ -419,12 +420,15 @@ class Article(models.Model):
     
     buy_print = models.URLField(_("buy print"),
                                 blank=True,
+                                null=True,
                                 help_text=_("URL to buy print article"))
     buy_digital = models.URLField(_("buy digital"),
                                   blank=True,
+                                  null=True,
                                   help_text=_("URL to buy digital article"))
     read_online = models.URLField(_("read online"),
                                   blank=True,
+                                  null=True,
                                   help_text=_("URL to read online article"))
     digital_version = FilerFileField(null=True, 
                                     blank=True, 
@@ -434,11 +438,13 @@ class Article(models.Model):
     issue = models.ForeignKey('Issue', related_name='articles', verbose_name=_('issue'))
     authors = models.ManyToManyField('Author', 
                                      blank=True,
+                                     null=True,
                                      related_name='articles', 
                                      verbose_name=_('authors'))
     organization = models.CharField(_("organization"),
-                                  max_length=200,
+                                  max_length=255,
                                   blank=True,
+                                  null=True,
                                   help_text=_("Organization or company related to the article"
                                               " in any way or has the rights on it"))
     is_commercial = models.BooleanField(_('commercial'), default=False,
@@ -454,8 +460,8 @@ class Article(models.Model):
                          blank=True)
     links = generic.GenericRelation(LinkItem)
     comment = models.TextField(_("comment"),
-                                   max_length=200,
                                    blank=True,
+                                   null=True,
                                    help_text=_("Comment, e.g. for internal usage"))
     class Meta:
         verbose_name = _('article')
