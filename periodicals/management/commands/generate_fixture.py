@@ -1,11 +1,9 @@
 import json
 from optparse import make_option
-from datetime import datetime 
+from datetime import date, datetime 
 from django.core.management.base import BaseCommand, CommandError
 
-ISSUE_YEARS = range(2000,2015)
-ISSUE_PERIOD = 6
-ISSUE_DEFAULT_PERIODICAL_ID = 1
+from .settings import *
 
 class Command(BaseCommand):
     args = '<model_label>'
@@ -45,7 +43,7 @@ class Command(BaseCommand):
                     issue['model'] = "periodicals.issue"
                     issue['fields']['issue'] = volume
                     issue['fields']['volume'] = issue_num
-                    issue['fields']['pub_date'] = datetime(year, issue_month, 1).isoformat()
+                    issue['fields']['pub_date'] = date(year, issue_month, 1).isoformat()
                     
                     now = datetime.now()
                     r =now.isoformat()
@@ -71,4 +69,14 @@ class Command(BaseCommand):
                 fp.close()
         else:
             self.stdout.write('Output data to stdout.')
-            self.stdout.write(json.dumps(issues, indent=4))    
+            self.stdout.write(json.dumps(issues, indent=4))   
+            
+# >>> for y in range(2000,2003):
+#...     for root, dirs, fnames in os.walk("fixtures/raw/arh/%s/" % y):
+#...         for f in fnames:
+#...             print f
+# output all files year by year 
+
+# rx = re.compile(r"\(([^)]+)\)") # take string between brackets
+# rx.findall(html.title.string)
+
