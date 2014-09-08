@@ -107,6 +107,20 @@ def remove_separator(string):
         #string = string.replace(u'Выставка', u'События >')
     return string
 
+def remove_garbage_chars(string):
+    pattern = re.compile(u'[\s\t\n\r]+', re.UNICODE)
+    string = pattern.sub(' ', string)
+    
+    # and replace duplicated spaces with the only
+    #pattern = re.compile(u'[\s]+', re.UNICODE)
+    #string = pattern.sub(' ', string)
+    
+    # and also add spaces after colon
+    pattern = re.compile(ur':(?=[^\s])')
+    string = pattern.sub(': ', string)
+    
+    return string
+
 def get_html_soup(filename):
     with open(filename, 'r') as content_file:
             content = content_file.read()
@@ -267,6 +281,7 @@ class Command(BaseCommand):
                                'buy_print' : '',
                                'buy_digital' : '',
                                'read_online' : '',
+                               'is_commercial': '',
                                }
                    }
         series = series2 = series3 = subseries = subseries2 = '' 
@@ -358,8 +373,9 @@ class Command(BaseCommand):
             
         if article_link:
             article_title = title_indexed or title or title2
+            article_title = remove_garbage_chars(article_title)
             article['fields']['title'] = escape(article_title)
-            self.stdout.write('Found title: "%s".' % title_indexed)
+            self.stdout.write('Found title: "%s".' % article_title)
             
             table = article_link.find_parent('table')
             if table:
@@ -507,12 +523,13 @@ class Command(BaseCommand):
                     subseries = ''
                 else:
                     self.stdout.write("Subseries not found. Looking for Org.name in the article title...")
-                    if article_title and article_title.count(':') > 1:
+                    if article_title and article_title.count(':') > 0:
                         organisation, e = get_cached_series(article_title.split(':', 1)[0])
                         if e: self.stdout.write(e)
                 if organisation:
-                    self.stdout.write("Saving '%s' as organisation title..." % organisation)
+                    self.stdout.write("Saving '%s' as organisation title and mark article as commercial..." % organisation)
                     article['fields']['organization'] = organisation
+                    article['fields']['is_commercial'] = True
                 else:
                     self.stdout.write("No Organisation title found...")
             # Final series breadcrumb. No more futher modifications
