@@ -118,8 +118,6 @@ class SeriesAdmin(TreeAdmin):
     form = movenodeform_factory(Series)
     list_display = ('name', 'articles_count')
     list_per_page = 300
-    #list_editable = ('name',)
-    list_display_links = ('articles_count',)
     
     def queryset(self, request):
         return Series.objects.annotate(articles_count=Count('article'))
