@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import os
 import re
 import json
@@ -17,6 +18,94 @@ from periodicals.models import Issue, Article
 from .settings import *
 
 DIRNAME = os.getcwd()
+
+series_cache = {}
+
+def get_cached_series(string):
+    """
+     looks for cached string using simplified string as a key
+     returns stored string if has or store to cache silently
+    """
+    errors = ''
+    string_orig = string
+    string = remove_trails(string)
+    string = remove_separator(string)
+    series, e = replace_quotes(string)
+    if e: errors = e
+    key = simplify_string(string)
+    if key in series_cache.keys():
+        string = series_cache[key]
+    else:
+        series_cache[key] = string
+    
+    if string_orig != string:
+        errors = errors + "\nWarning. Found stored string '%s'. Using it instead of '%s'" % (string, string_orig)
+    return string, errors 
+
+def replace_quotes(string):
+    errors = ''
+    count = 0
+    if not string: return string, errors
+    pattern = re.compile(u'[\"]', re.UNICODE)
+    count = string.count('"')
+    #if count == 0: return string, errors
+    if count == 1: 
+        errors = "Warning. String contains the double-quote symbol,  that's not safe. Replacing with [']"
+        string = pattern.sub("'", string)
+    elif count == 2:
+        errors = """Warning. String contains pair of double-quote symbols,  that's not safe.
+                 Replacing with [&raquo; &laquo;]"""
+        pattern = re.compile(u'[\"{1}]', re.UNICODE)
+        string = pattern.sub(u"\u00ab", string, 1)
+        string = pattern.sub(u"\u00bb", string, 1)
+    elif count == 3:
+        errors = """Warning. String contains THREE double-quote symbols,  that's not safe
+                 and strange. Replacing with [&laquo; &laquo; &raquo;].
+                 Check it manually."""
+        string = pattern.sub(u"\u00ab", string, 2)
+        string = pattern.sub(u"\u00bb", string, 1)
+    elif count > 3:
+        errors = """Error. FOUR or more double-quote symbols found. 
+                    This case is not defined. Check or edit it manually"""
+    return string, errors
+
+def remove_trails(string):
+    return string.strip(' :,.-\n\r\t')
+
+def remove_spaces(string):
+    pattern = re.compile('[\s\.\t\n\r]+', re.UNICODE) #all duplicated spaces and dots
+    return pattern.sub(' ', string)                    #replace with single space
+    
+def simplify_string(string):
+    string = remove_spaces(remove_trails(string))
+    pattern = re.compile('[\W_]+', re.UNICODE) #all non-word chars and underscore
+    string = pattern.sub('-', string)
+    return string.lower()
+
+def remove_separator(string):
+    #found = 0
+    #pattern = re.compile(u'[•\*]', re.UNICODE)
+    
+    pattern = re.compile(u'[•\*]', re.UNICODE)
+    #string, found = re.subn(pattern, ' > ', string)
+    string = pattern.sub('', string)
+    string = remove_spaces(string)
+    #string = string.replace(u'•', u'>')
+    #string = string.replace(u'*', u'>')
+    #string = string.replace(u' - ', u'>')
+    #string = string.replace(u'. ', u'>')
+    #print('Finding separator... %s' % found)
+    #if not found:
+        #string = string.replace(u'Марка', u'Марка >')
+    #   flags = re.UNICODE | re.IGNORECASE
+        #string = re.sub(re.compile(u'^марка\s', flags ), u'Марка > ', string)
+    #    string = re.sub(re.compile(u'^события\s', flags), u'События > ', string)
+    #    string = re.sub(re.compile(u'^новости\s', flags), u'Новости > ', string)
+    #    string = re.sub(re.compile(u'^выставка\s', flags), u'Выставка > ', string)
+        #string = string.replace(u'События', u'События >')
+        #string = string.replace(u'Новости', u'События >')
+        #string = string.replace(u'Выставка', u'События >')
+    return string
 
 def get_html_soup(filename):
     with open(filename, 'r') as content_file:
@@ -78,7 +167,7 @@ class Command(BaseCommand):
     articles_processed = 0
     articles = []
     error_log = []
-    series = []
+    
     series_list = []
     dry_run = False
     option_list = BaseCommand.option_list + (
@@ -116,6 +205,7 @@ class Command(BaseCommand):
             string = "%s-%s" % (string_orig, i)
             i = i + 1
         return string
+    
     def get_article_link_tag(self, index, filename):
         link_tags = index.find_all(href=re.compile(os.path.basename(filename)))
         link_text1 = link_text2 = ''
@@ -147,6 +237,17 @@ class Command(BaseCommand):
         else:
             self.log_error(filename, "Article link not found in the index file given")
             return None
+ 
+    def get_cleaned_series(self, tag):
+        cleaned_series = ''
+        try:
+            cleaned_series = tag.find('span').contents[0]
+        except (AttributeError, IndexError):
+            return ''
+        if cleaned_series:
+            self.stdout.write('Warning. Using truncated variant: "%s"' % cleaned_series)
+            return cleaned_series 
+            
         
     def extract_data(self, file_in_full, **kwargs):
         article = {'model' : 'periodicals.article',
@@ -168,11 +269,13 @@ class Command(BaseCommand):
                                'read_online' : '',
                                }
                    }
-        series = series2 = subseries = subseries2 = series_tag = series_tag2 = None
+        series = series2 = series3 = subseries = subseries2 = '' 
+        series_tag = series_tag2 = series_tag3 = subseries_tag = subseries_tag2 = {}
         title = title2 = content = slug = ''
         volume = 0
         periodical_id = 0
-        self.stdout.write('Processing file "%s".' % os.path.basename(file_in_full))
+        self.stdout.write('-------------------------------------------------------------------------')
+        self.stdout.write('Processing file "%s".' % file_in_full)
         
         html = get_html_soup(file_in_full)
         #article['title'] = html.title.string.rsplit( ')', 1)[1].strip()
@@ -262,6 +365,7 @@ class Command(BaseCommand):
             if table:
                 series_tag = table.find('strong')
                 series_tag2 = table.find(class_="top_no_indent")
+                series_tag3 = table.find('span', class_="top")
             else:
                 self.stdout.write('No surrounding table found. Cant find series tags')
                 self.log_error(file_in_full, "No surrounding table found. Cant find series tags")
@@ -274,14 +378,31 @@ class Command(BaseCommand):
                 series2 = escape(series_tag2.text)
             except AttributeError:
                 self.stdout.write('Series (variant 2) not found. Only "%s".' % series2)
-                
+            
+            try:
+                series3 = escape(series_tag3.text)
+            except AttributeError:
+                self.stdout.write('Series (variant 3) not found. Only "%s".' % series3)
+            
+            cleaned_series = ''
             if series_tag and series_tag.contents[0].name == 'a':
                 self.stdout.write('Series (1 variant) contains link and this is wrong. Use second variant: "%s"' % series2)
                 series = series2
             elif not series_tag and series_tag2:
                 series = series2
                 self.stdout.write('Series (1 variant) not found. Use second variant: "%s"' % series2)
-                
+            elif not series_tag2 and series_tag3:
+                self.stdout.write('Series (2 variant) not found. Use third variant: "%s"' % series3)
+                self.stdout.write('Cheking series3...')
+                try:
+                    cleaned_series = series_tag3.find('span', class_="eng_h").contents[0]
+                except (AttributeError, IndexError):
+                    self.stdout.write('Special tags not found. Seems like "%s" is wrong series. Drop it' % series3)
+                    series3 = ''
+                if cleaned_series: 
+                    series = series_tag3.contents[0]
+            if series == series2:
+                series = self.get_cleaned_series(series_tag2) or series  
                 
             if not series:
                 self.stdout.write('Check for special case for first three articles')
@@ -290,49 +411,133 @@ class Command(BaseCommand):
                     self.stdout.write('Using article link from index file as series name %s' % series)
                 else:
                     series = "series_not_found"
-                    self.log_error(file_in_full, "Cant find article series in three way. Use default '%s'" % series)
+                    self.log_error(file_in_full, "Error. Cant find article series in three way. Use default '%s'" % series)
             
-            series = series.strip(' \n\r\t')    
+            #series = remove_trails(series)
+            #series = remove_separator(series)
+            series, e = get_cached_series(series)
+            if e: self.stdout.write(e)
+            #if series != series_cached:
+                #self.stdout.write("Warning. Found stored series name '%s'. Using it instead of '%s'" % (series_cached, series))
+                #series = series_cached
+                #self.log_error(file_in_full, "Warning. Found stored series name '%s'. Using it instead of '%s'" % (series_cached, series))
             
-            subseries_tag = article_link.find_previous('strong')
+            
             try:
-                subseries = escape(subseries_tag.text)
+                subseries = article_link.find('strong').text
             except AttributeError:
-                self.stdout.write('Subseries not found. Only "%s".' % subseries)
-                subseries = None
+                self.stdout.write('Subseries (0 variant) not found. Only "%s".' % subseries)
+                subseries = ''
+            if not subseries:    
+                subseries_tag = article_link.find_previous('strong')
+                try:
+                    subseries = escape(subseries_tag.text)
+                except AttributeError:
+                    self.stdout.write('Subseries (1 variant) not found. Only "%s".' % subseries)
+                    subseries = ''
+            else:
+                try:
+                    title_indexed_2 = article_link.find('br').next_sibling
+                    self.stdout.write('Subseries (0 variant) found: "%s".' % subseries)
+                    self.stdout.write('Title changed from: "%s" to "%s"' % (article_title, title_indexed_2))
+                    article_title = remove_trails(title_indexed_2)
+                except AttributeError:
+                    self.log_error(file_in_full, 'Subseries (0 variant) found but no <br> tag. Using next variant for title')
+                    self.stdout.write('Subseries (0 variant) found but no <br> tag. Using next variant for title if exists')
+                
+                    
             subseries_tag2 = article_link.find_previous(style="color:#2e8b57")
+            subseries2 = ''
+            #self.stdout.write('Subseries (2 variant) before TRY "%s".' % subseries2)
             try:
                 subseries2 = escape(subseries_tag2.text)
             except AttributeError:
-                subseries2 = None
-                self.stdout.write('Subseries not found. Only "%s".' % subseries2)
-                
+                self.stdout.write('Subseries (2 variant) not found. Only "%s".' % subseries2)
+                subseries2 = ''
+            #self.stdout.write('Subseries (2 variant) after TRY "%s".' % subseries2)
+            subseries = subseries or subseries2
             if subseries_tag and ('a' in [ t.name for t in subseries_tag.children ]):
-                self.stdout.write('SubSeries (1 variant) contains link and this is wrong. Use second variant: "%s"' % series2)
-                subseries = subseries2
+                self.stdout.write('SubSeries (1 variant) contains link and this is wrong. Try to use second variant: "%s"' % subseries2)
+                if subseries_tag2 and ('a' in [ t2.name for t2 in subseries_tag2.children ]):
+                    self.stdout.write('SubSeries (2 variant) contains link and this is wrong. Drop it')
+                    subseries = ''
+                else:    
+                    subseries = self.get_cleaned_series(subseries_tag2) or subseries2
+            subseries = remove_separator(subseries)
             if subseries:
-                subseries = subseries.strip(' \n\r\t')
+                #subseries = remove_trails(subseries)
+                #subseries = remove_separator(subseries)
+                subseries, e = get_cached_series(subseries)
+                if e: self.stdout.write(e)
+                #if subseries != subseries_cached:
+                    #self.stdout.write("Warning. Found stored subseries name '%s'. Using it instead of '%s'" % (subseries_cached, subseries))
+                    #subseries = subseries_cached
+                    #self.log_error(file_in_full, "Warning. Found stored subseries name '%s'. Using it instead of '%s'" % (subseries_cached, subseries))
             
+            if series == subseries:
+                
+                self.stdout.write("Strange! Series and subseries strings identical. Trying another variant for series")
+                if series2 and subseries != series2:
+                    self.log_error(file_in_full, "It's seems like another series name found. Use series2")
+                    self.stdout.write("It's seems like another series name found. Use series2")
+                    self.stdout.write("Changing series '%s' to: '%s'" % (series, series2))
+                    series = self.get_cleaned_series(series_tag2)
+                    series, e = get_cached_series(series)
+                    if e: self.stdout.write(e)
+                elif series3 and subseries != series3:
+                    self.log_error(file_in_full, "It's seems like another series name found. Use series3")
+                    self.stdout.write("It's seems like another series name found. Use series3")
+                    self.stdout.write("Changing series '%s' to: '%s'" % (series, series3))
+                    series = series3
+                    series, e = get_cached_series(series)
+                    if e: self.stdout.write(e)
+                else:
+                    self.stdout.write("There are no second or third variant for series. Assuming we found right one twice so use only series")
+            
+            # Check for special case for subseries of "Mark Equipment" which may contains Organisation
+            organisation = ''
+            flags = re.UNICODE | re.IGNORECASE
+            if len(re.findall(re.compile(u'^Марка\sОборудование', flags ), series)) == 1:
+                self.stdout.write("Warning. Found special series %s" % series)
+                self.stdout.write("Looking for Organisation title...")
+                
+                if subseries and subseries != series:
+                    self.stdout.write("Subseries is not empty. Use '%s' as Organisation name..." % subseries)
+                    organisation = subseries
+                    subseries = ''
+                else:
+                    self.stdout.write("Subseries not found. Looking for Org.name in the article title...")
+                    if article_title and article_title.count(':') > 1:
+                        organisation, e = get_cached_series(article_title.split(':', 1)[0])
+                        if e: self.stdout.write(e)
+                if organisation:
+                    self.stdout.write("Saving '%s' as organisation title..." % organisation)
+                    article['fields']['organization'] = organisation
+                else:
+                    self.stdout.write("No Organisation title found...")
+            # Final series breadcrumb. No more futher modifications
             if (series and subseries) and (series != subseries):
+                #series_main = series
                 series = series + ' > ' + subseries
-                self.series_list.append(series)
             
+            self.series_list.append(series)
+            self.stdout.write("Result series for article: '%s'" % series)
             if len(series) > 100:
                 self.log_error(file_in_full, "Warning! Series string is too long (>100)")
             
             
             if article_link.next_sibling:
                 if article_link.next_sibling.name == 'br' and \
-                    article_link.next_sibling.next_sibling.name in ('em', 'i'):
-                    article['fields']['description'] = article_link.next_sibling.next_sibling.string
+                                        article_link.next_sibling.next_sibling.name in ('em', 'i'):
+                    article['fields']['announce'] = unicode(article_link.next_sibling.next_sibling.string)
                 else:
                     for s in article_link.next_siblings:
                         if s.name in ('strong', 'a'):
                             break
-                        if s.name in ('em', 'i'):
-                            article['fields']['description'] = s.string
-                        elif len(" ".split(s.string)) > 2:
-                            article['fields']['description'] = s.string
+                        if s.name in ('em', 'i') or len(" ".split(s.string)) > 2:
+                            article['fields']['announce'] = unicode(s.string)
+                        #elif len(" ".split(s.string)) > 2:
+                        #    article['fields']['announce'] = s.string
                                  
         elif title or title2:
             article['fields']['title'] = escape(title) or title2
@@ -348,7 +553,7 @@ class Command(BaseCommand):
         if not self.dry_run:
             series = create_from_breadcrumbs(series) 
             if series.pk > 0:
-                article['fields']['series'] = series
+                article['fields']['series'] = series.pk if self.dry_run else series
             else:
                 self.stdout.write('Cant find series in the DB or get a new one. It will raise an error while loading json.')
                 self.log_error(file_in_full, "Cant find series in the DB or get a new one. Series: %s" % series)
@@ -417,6 +622,7 @@ class Command(BaseCommand):
                     self.stdout.write('We have a whole folder. Processing...')
                     for year in ISSUE_YEARS:
                         year_dir = os.path.join(file_in_full, "%s" % year)
+                        self.stdout.write('=======================================================================')
                         self.stdout.write('YEAR: %d' % year)
                         self.stdout.write('Going to: %s' % year_dir)
                         
@@ -424,7 +630,7 @@ class Command(BaseCommand):
                             issue_month = issue_num * (12/ISSUE_PERIOD) - 1
                             issue_dir = os.path.join(year_dir, "%d" % ((year-ISSUE_FIRST_YEAR)*ISSUE_PERIOD+issue_num))
                             if os.path.isdir(issue_dir):
-                                self.stdout.write('Going to: %s' % issue_dir)
+                                self.stdout.write('*** Going to: %s ***' % issue_dir)
                                 issue_index_file = os.path.join(issue_dir, "index.php")
                                 issue_index_html = None
                                 if os.path.isfile(issue_index_file):
@@ -472,9 +678,10 @@ class Command(BaseCommand):
             else:
                 # Import articles to DB
                 self.stdout.write('Store data in the DB...')
-                article_errors = ''
+                
                 article_processed = 1
                 for article in self.articles:
+                    article_errors = ''
                     self.stdout.write('Saving article from file: "%s".' % article['origin'])
                     article_fields = article['fields']
                     article_instance = Article(**article_fields)
@@ -487,12 +694,26 @@ class Command(BaseCommand):
                         self.log_error(article['origin'], 'Errors occured while validating models data: "%s".' % json.dumps(article_errors, indent=4))
                     else:
                         self.stdout.write('Everything seems to be ok. Trying to save...')
-                        article_instance.save()
+                        try:
+                            article_instance.save()
+                        except UnicodeEncodeError as e:
+                            article_errors = e.reason
+                            error_object = e.object
+                        if article_errors:
+                            self.stdout.write('FAIL! Errors occured while saving models data: reason "%s", object: %s .' % (article_errors, error_object))
+                            self.stdout.write('We had try to save article fields')
+                            for k in article_fields.keys():
+                                self.stdout.write(u'Field: "%s" \nValue: %s' % (k, article_fields[k]))
+                            self.log_error(article['origin'], 'Errors occured while saving models data: "%s".' % article_errors)
+                            #break
+                        else:
+                            self.stdout.write('OK. Seems to be saved. Checking for ID...".')
+                        
                         if article_instance.id:
-                            self.stdout.write('Saved OK.')
+                            self.stdout.write('Saved OK. Article ID is: %s' % article_instance.id)
                             article_processed = article_processed + 1
                         else:
-                            self.stdout.write('Something was wrong...')
+                            self.stdout.write('Something was wrong... Article saved but has not ID?')
                 self.stdout.write('Articles processed: %d' % (article_processed-1))
             
         else:
