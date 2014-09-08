@@ -60,7 +60,7 @@ class SeriesList(ListView):
     def get_queryset(self):
         self.periodical = get_object_or_404(Periodical,
                                             slug=self.kwargs['periodical_slug'])
-        return Series.objects.filter(article__issue__periodical=self.periodical).\
+        return Series.objects.filter(article__issue__periodical=self.periodical).order_by('name').\
             annotate(series_count=Count('article'))
 
     def get_context_data(self, **kwargs):
