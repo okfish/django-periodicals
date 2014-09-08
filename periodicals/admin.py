@@ -68,15 +68,18 @@ class IssueAdmin(admin.ModelAdmin):
 
 class ArticleAdmin(admin.ModelAdmin):
     form = ArticleCreateUpdateForm
-    list_display = ('title', 'issue', 'created', 'series', 'organization')
-    ordering = ('-issue',)
-    filter_horizontal = ('authors',)
+    list_display = ('id', 'title', 'issue_display_name', 'series', 'organization')
+    list_editable = ('title', 'organization',)
+    list_filter = ('status', 'is_commercial', 'series')
+    list_select_related = ('authors', 'articles' , 'issue')
+    ordering = ('-issue', '-issue__volume')
+    filter_vertical = ('authors', )
     search_fields = ['title', 
 		    'subtitle', 
-		    'series', 
 		    'description', 
 		    'announce', 
 		    'content',
+            'organization',
 		    'tags']
     save_on_top = True
 
@@ -107,11 +110,17 @@ class ArticleAdmin(admin.ModelAdmin):
     inlines = [
         LinkItemInline
     ]
-
+    def issue_display_name(self, inst):
+        return inst.issue.display_name()
+    issue_display_name.short_description = _('Issue')
+        
 class SeriesAdmin(TreeAdmin):
     form = movenodeform_factory(Series)
     list_display = ('name', 'articles_count')
-
+    list_per_page = 300
+    #list_editable = ('name',)
+    list_display_links = ('articles_count',)
+    
     def queryset(self, request):
         return Series.objects.annotate(articles_count=Count('article'))
 
