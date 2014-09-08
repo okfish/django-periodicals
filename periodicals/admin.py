@@ -67,8 +67,8 @@ class IssueAdmin(admin.ModelAdmin):
 
 class ArticleAdmin(admin.ModelAdmin):
     form = ArticleCreateUpdateForm
-    list_display = ('issue', 'created', 'series', 'page', 'title', 'tags')
-    ordering = ('-created',)
+    list_display = ('title', 'issue', 'created', 'series', 'organization')
+    ordering = ('-issue',)
     filter_horizontal = ('authors',)
     search_fields = ['title', 
 		    'subtitle', 
@@ -109,6 +109,8 @@ class ArticleAdmin(admin.ModelAdmin):
 
 class SeriesAdmin(TreeAdmin):
         form = movenodeform_factory(Series)
+        #ordering = ('-name',)
+        #list_filter = ('depth',)
 
 admin.site.register(LinkItem, LinkItemAdmin)
 admin.site.register(Author, AuthorAdmin)
