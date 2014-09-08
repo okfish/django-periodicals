@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.db.models import Count
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
@@ -108,9 +109,16 @@ class ArticleAdmin(admin.ModelAdmin):
     ]
 
 class SeriesAdmin(TreeAdmin):
-        form = movenodeform_factory(Series)
-        #ordering = ('-name',)
-        #list_filter = ('depth',)
+    form = movenodeform_factory(Series)
+    list_display = ('name', 'articles_count')
+
+    def queryset(self, request):
+        return Series.objects.annotate(articles_count=Count('article'))
+
+    def articles_count(self, inst):
+        return inst.articles_count
+
+    articles_count.admin_order_field = 'articles_count'    
 
 admin.site.register(LinkItem, LinkItemAdmin)
 admin.site.register(Author, AuthorAdmin)
