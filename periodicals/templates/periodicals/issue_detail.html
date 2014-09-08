@@ -64,20 +64,29 @@ function open_add_link(button){
 {% block obj_list %}
 <div class="articles">
   {% if issue.articles %}
-  <h2>Articles</h2>
-  <table class="article-list table table-bordered table-striped">
-    <thead>
-      <tr><th class="page-header">Page</th><th class="page-title">Title</th><th class="page-authors">Authors</th></tr>
-    </thead>
-    <tbody>
-      {% for article in issue.articles.all %}
-      <tr>      
-        <td class="article-page-number">{% if article.page %}<a href="{{article.get_absolute_url}}">{{article.page}}</a>{% else %}&nbsp;{% endif %}</td>      
-        <td><a href="{{article.get_absolute_url}}">{{article.series}}<br/>{{article.title}}</a></td><td>{% for author in article.authors.all %}<a href="{{author.get_absolute_url}}">{{author.display_name}}</a>&nbsp;{% endfor %}</td>      
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  	{# with issue.articles.all as articles #}
+	  {% regroup issue.articles.all by series as articles_list %}
+	  <h2>Articles</h2>
+	  <table class="article-list table table-bordered table-striped">
+	    <thead>
+	      <tr><th class="page-header">Page</th><th class="page-title">Title</th><th class="page-authors">Authors</th></tr>
+	    </thead>
+	    <tbody>
+	      {% for article in articles_list %}
+	      <tr>
+	      	<td colspan="3">{{ article.grouper }}</td>
+	      </tr>
+	      {% for item in article.list %}
+	     <tr> 
+	        <td class="article-page-number">{% if item.page %}<a href="{{article.get_absolute_url}}">{{item.page}}</a>{% else %}&nbsp;{% endif %}</td>
+	              
+	        <td><a href="{{item.get_absolute_url}}">{{item.title}}</a></td><td>{% for author in item.authors.all %}<a href="{{author.get_absolute_url}}">{{author.display_name}}</a>&nbsp;{% endfor %}</td>
+	        {% endfor %}      
+	      </tr>
+	      {% endfor %}
+	    </tbody>
+	  </table>
+	{# endwith #}
   {% endif %}
   {% if not issue.articles %}
   <h2>No Articles In Database</h2>
