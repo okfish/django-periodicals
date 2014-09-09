@@ -1,5 +1,8 @@
 {% extends "periodicals/base.html" %}
 {% load i18n %}
+{% load highlight %}
+	
+
 
 {% block title %}{{block.super}} - Periodical Search{% endblock %}
 
@@ -7,10 +10,7 @@
 <div class="breadcrumbs"><a href="/">Home</a>&nbsp;&gt;&nbsp;<a href="{% url 'periodicals_list' %}">Periodicals</a>&nbsp;&gt;&nbsp;Periodical Search</div>
 {% endblock breadcrumbs %}
 
-{% block innercontent %}
-{% block obj_detail %}
-<div class="search_detail">
-<h1>Periodical Search</h1>
+{% block sidebar_search %}
 <div class="search-form">
   <form method="get" action=".">
     <div class="fieldWrapper">
@@ -30,32 +30,52 @@
         </dl>
     {% endif %}
 </div>
+{% endblock sidebar_search %}
+
+{% block innercontent %}
+{% block obj_detail %}
+<div class="search_detail">
+<h1>Periodical Search</h1>
+
 </div>
 {% endblock obj_detail %}
 {% if query %}
-{% block object_list %}
-{% if page.object_list %}
-<div class="search-results">
-  <h2>Search Results</h2>
-  {% for result in page.object_list %}
-  <p>
-    <div class="result-link"><a href="{{result.object.get_absolute_url}}" class="result-title">{{ result.object.title }}</a></div>
-    <div class="result-summary">{{result.object.issue.periodical.name}} {{result.object.issue.display_year}} {{result.object.issue.display_name}}</div>
-  </p>
-  {% endfor %}
-  {% else %}
-  <h2>No matching articles found.</h2>
-  	{% if suggestion %}
-        {% url 'haystack_search' as search_url %}
-        	{% blocktrans %}
-            Did you mean <a href="{{ search_url }}?q={{ suggestion }}">"{{ suggestion }}"</a>?
-			
-			{% endblocktrans %}
-	{% endif %}
+	{% block object_list %}
+		<div class="search-results">
+	  	{% if page.object_list %}
+		  	<h2>Search Results</h2>
+			{% for result in page.object_list %}
+			  <p>
+			    <div class="result-link">
+			    	<a href="{{result.object.get_absolute_url}}" class="result-title">
+			    		{% highlight result.object.title with query html_tag "mark" max_length 255 %}
+			    		
+			    	</a>
+			    </div>
+			    <div class="result-summary">
+			    	{% highlight result.object.announce with query html_tag "mark" max_length 255 %}
+			    	
+			    	<small style="color: grey;">
+			    		{{result.object.issue.periodical.name}} {{result.object.issue.display_year}} {{result.object.issue.display_name}}
+			    	</small>
+			    </div>
+			  </p>
+			{% endfor %}
+	  	{% else %}
+	  		<h2>No matching articles found.</h2>
+		  	{% if suggestion %}
+		  		<p>
+		        	{% url 'haystack_search' as search_url %}
+		        	{% blocktrans %}
+		            	Did you mean <a href="{{ search_url }}?q={{ suggestion }}">"{{ suggestion }}"</a>?
+					{% endblocktrans %}
+				</p>
+			{% endif %}
+	  	
+	  	{% endif %}
+	 	</div>
+	{% endblock object_list %}
 {% endif %}
-</div>
-{% endblock object_list %}
-  {% endif %}
 {% block pagination %}
 <ul class="pager">
   <li class="previous">{% if page.has_previous %}<a href="?q={{query}}&page={{ page.previous_page_number }}">previous</a>{% endif %}</li>
