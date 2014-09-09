@@ -1,4 +1,5 @@
 {% extends "periodicals/base.html" %}
+{% load i18n %}
 
 {% block title %}{{block.super}} - Periodical Search{% endblock %}
 
@@ -32,7 +33,14 @@
   {% endfor %}
   {% else %}
   <h2>No matching articles found.</h2>
-  {% endif %}
+  	{% if suggestion %}
+        {% url 'haystack_search' as search_url %}
+        	{% blocktrans %}
+            Did you mean <a href="{{ search_url }}?q={{ suggestion }}">"{{ suggestion }}"</a>?
+			
+			{% endblocktrans %}
+	{% endif %}
+{% endif %}
 </div>
 {% endblock object_list %}
   {% endif %}
