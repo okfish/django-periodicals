@@ -1,14 +1,16 @@
 {{object.title}}
-{{object.title}}
-
+{{object.subtitle}}
 {{object.series.full_name}}
+{{object.organization}}
 
 {% for author in object.authors.all %}
 {{author.get_name_display}}
 {% endfor %}
+
 {{object.announce}}
 {{object.description}}
-{{object.organization}}
+{{object.content}}
+
 {% load tagging_tags %}
 {% tags_for_object object as tag_list %}
 {% for tag in tag_list %}
