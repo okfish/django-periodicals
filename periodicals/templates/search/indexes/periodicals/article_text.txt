@@ -7,9 +7,9 @@
 {{author.get_name_display}}
 {% endfor %}
 
-{{object.announce}}
-{{object.description}}
-{{object.content}}
+{{ object.announce|striptags|safe }}
+{{ object.description|striptags|safe }}
+{{ object.content|striptags|safe }}
 
 {% load tagging_tags %}
 {% tags_for_object object as tag_list %}
