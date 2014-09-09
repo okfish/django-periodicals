@@ -18,6 +18,18 @@
     </div>
   </form>
 </div>
+<div>
+	{% if has_facets %}
+        <h4>{% trans "Refine your search" %}</h4>
+        <dl>
+            {% for field, data in facet_data.items %}
+                {% if data.results %}
+                    {% include 'periodicals/partials/facet.html' with name=data.name items=data.results %}
+                {% endif %}
+            {% endfor %}
+        </dl>
+    {% endif %}
+</div>
 </div>
 {% endblock obj_detail %}
 {% if query %}

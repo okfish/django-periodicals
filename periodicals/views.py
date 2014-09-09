@@ -16,6 +16,7 @@ from captcha.fields import ReCaptchaField
 from haystack import views
 
 from .models import Author, Periodical, Issue, Article, Series, LinkItem, STATUS_HIDDEN, STATUS_DRAFT
+from . import facets
 
 settings.PERIODICALS_PAGINATION = getattr(settings, 'PERIODICALS_PAGINATION', 20)
 settings.PERIODICALS_LINKS_ENABLED = getattr(settings, 'PERIODICALS_LINKS_ENABLED', True)
@@ -359,16 +360,16 @@ class FacetedSearchView(views.FacetedSearchView):
                 extra['suggestion'] = suggestion
 
         # Convert facet data into a more useful datastructure
-#         if 'fields' in extra['facets']:
-#             extra['facet_data'] = facets.facet_data(
-#                 self.request, self.form, self.results)
-#             has_facets = any([len(data['results']) for
-#                               data in extra['facet_data'].values()])
-#             extra['has_facets'] = has_facets
+        if 'fields' in extra['facets']:
+            extra['facet_data'] = facets.facet_data(
+                self.request, self.form, self.results)
+            has_facets = any([len(data['results']) for
+                              data in extra['facet_data'].values()])
+            extra['has_facets'] = has_facets
 
         # Pass list of selected facets so they can be included in the sorting
         # form.
-#        extra['selected_facets'] = self.request.GET.getlist('selected_facets')
+        extra['selected_facets'] = self.request.GET.getlist('selected_facets')
 
         return extra
 

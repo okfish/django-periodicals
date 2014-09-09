@@ -15,7 +15,21 @@ from .views import (AuthorList, AuthorDetail,
 
 
 # query results with most recent publication date first
-sqs = SearchQuerySet().order_by('-pub_date')
+#sqs = SearchQuerySet()
+
+def get_sqs():
+    """
+    Return the SQS required by a the Haystack search view
+    """
+    # Build SQS based on the PERIODICALS_SEARCH_FACETS settings
+    sqs = SearchQuerySet().order_by('-pub_date')
+    for facet in settings.PERIODICALS_SEARCH_FACETS['fields'].values():
+        options = facet.get('options', {})
+        sqs = sqs.facet(facet['field'], **options)
+    for facet in settings.PERIODICALS_SEARCH_FACETS['queries'].values():
+        for query in facet['queries']:
+            sqs = sqs.query_facet(facet['field'], query[1])
+    return sqs
 
 urlpatterns = \
     patterns('',
@@ -23,7 +37,7 @@ urlpatterns = \
                  search_view_factory(
                                      view_class=FacetedSearchView,
                                      #form_class=self.search_form,
-                                     searchqueryset=sqs),
+                                     searchqueryset=get_sqs()),
                  name='haystack_search',
                  ),
              # not in sitemap
