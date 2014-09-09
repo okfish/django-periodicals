@@ -37,7 +37,7 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.series.full_name
     
     def prepare_issue(self, obj):
-        return obj.issue.display_name()
+        return "%s %s" % (obj.issue.display_name(), obj.issue.display_year())
 
     def prepare(self, obj):
         prepared_data = super(ArticleIndex, self).prepare(obj)
