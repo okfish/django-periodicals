@@ -44,6 +44,11 @@
 		<div class="search-results">
 	  	{% if page.object_list %}
 		  	<h2>Search Results</h2>
+		  	 {% if page.paginator.count %}
+	            {% blocktrans with start=page.start_index end=page.end_index total=page.paginator.count %}
+	                Showing <strong>{{ start }}</strong> to <strong>{{ end }}</strong> of <strong>{{ total }}</strong> results.
+	            {% endblocktrans %}
+            {% endif %} 
 			{% for result in page.object_list %}
 			  <p>
 			    <div class="result-link">
@@ -54,7 +59,7 @@
 			    </div>
 			    <div class="result-summary">
 			    	{% highlight result.object.announce with query html_tag "mark" max_length 255 %}
-			    	
+			    	{% highlight result.object.content with query html_tag "mark" max_length 50 %}
 			    	<small style="color: grey;">
 			    		{{result.object.issue.periodical.name}} {{result.object.issue.display_year}} {{result.object.issue.display_name}}
 			    	</small>
