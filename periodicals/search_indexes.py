@@ -15,6 +15,7 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     authors = indexes.MultiValueField(null=True, faceted=True)
     organization = indexes.CharField(null=True, faceted=True, model_attr='organization')
     issue = indexes.CharField(null=True, faceted=True)
+    year = indexes.CharField(null=True, faceted=True)
     # pregenerate the search result HTML for an Article
     # this avoids any database hits when results are processed
     # at the cost of storing all the data in the Haystack index
@@ -38,7 +39,10 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     
     def prepare_issue(self, obj):
         return "%s %s" % (obj.issue.display_name(), obj.issue.display_year())
-
+    
+    def prepare_year(self, obj):
+        return obj.issue.display_year()
+    
     def prepare(self, obj):
         prepared_data = super(ArticleIndex, self).prepare(obj)
 
