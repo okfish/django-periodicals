@@ -520,7 +520,7 @@ class Series(MP_Node):
         anc_names = []
         separator = self._full_name_separator
         if self.is_root():
-            return self.__str__()
+            return self.name
         for anc in self.get_ancestors().values('name'):
             anc_names.append(anc['name'])
         anc_names.append(self.name)
