@@ -2,13 +2,16 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
-from haystack.views import SearchView
+#from haystack.views import SearchView
 from haystack.query import SearchQuerySet
+from haystack.views import search_view_factory
+
 from .views import (AuthorList, AuthorDetail,
                     ArticleDetail, ArticleTags,
                     IssueYear, IssueDetail,
                     PeriodicalList, PeriodicalDetail,
-                    SeriesList, SeriesDetail)
+                    SeriesList, SeriesDetail,
+                    FacetedSearchView)
 
 
 # query results with most recent publication date first
@@ -17,10 +20,10 @@ sqs = SearchQuerySet().order_by('-pub_date')
 urlpatterns = \
     patterns('',
              url(r'^search/',
-                 SearchView(load_all=False,
-                            template="periodicals/search.html",
-                            searchqueryset=sqs,
-                            ),
+                 search_view_factory(
+                                     view_class=FacetedSearchView,
+                                     #form_class=self.search_form,
+                                     searchqueryset=sqs),
                  name='haystack_search',
                  ),
              # not in sitemap
