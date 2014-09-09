@@ -1,7 +1,7 @@
 {% extends "periodicals/base.html" %}
 {% load i18n %}
 {% load highlight %}
-	
+{% load more_like_this %}	
 
 
 {% block title %}{{block.super}} - Periodical Search{% endblock %}
@@ -60,9 +60,13 @@
 			    <div class="result-summary">
 			    	{% highlight result.object.announce with query html_tag "mark" max_length 255 %}
 			    	{% highlight result.object.content with query html_tag "mark" max_length 50 %}
+			    	<p align="right">
+			    	{# more_like_this result.object as related_content #}
+			    	{# for rc in related_content %}{{ rc.id }},{% endfor #}
 			    	<small style="color: grey;">
-			    		{{result.object.issue.periodical.name}} {{result.object.issue.display_year}} {{result.object.issue.display_name}}
+			    		{{result.object.issue.periodical.name}} > {{result.object.issue.display_year}} > {{result.object.issue.display_name}} > {{result.object.series}}
 			    	</small>
+			    	</p>
 			    </div>
 			  </p>
 			{% endfor %}
