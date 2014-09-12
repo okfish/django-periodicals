@@ -1,4 +1,5 @@
 {% extends "periodicals/base_periodical.html" %}
+{% load thumbnail %}
 
 {% block title %}{{periodical.name}} - {{issue.display_name}} - {{issue.display_date}}{% endblock %}
 
@@ -31,12 +32,12 @@ function open_add_link(button){
 {% if issue.printed_cover or issue.digital_cover %}
 {% if issue.printed_cover %}
 <div class="article-image">
-  <a href="{{issue.buy_print}}"><img src="{{MEDIA_URL}}{{issue.printed_cover}}" /></a>
+  <a href="{{issue.buy_print}}"><img src="{% thumbnail issue.printed_cover 250x250 upscale %}"/></a>
 </div>
 {% endif %}
 {% if issue.digital_cover %}
 <div class="article-image">  
-  <a href="{{issue.buy_digital}}"><img src="{{MEDIA_URL}}{{issue.digital_cover}}" /></a>
+  <a href="{{issue.buy_digital}}"><img src="{% thumbnail issue.digital_cover 250x250 upscale %}"/></a>
 </div>
 {% endif %}
 {% endif %}

@@ -1,4 +1,6 @@
 {% extends "periodicals/base_periodical.html" %}
+{% load i18n %}
+{% load thumbnail %}
 
 {% block title %}{{ block.super }} - {{periodical.name}} - Issues for {{year}} {% endblock %}
 
@@ -23,10 +25,10 @@
       {% for issue in object_list %}
       <td><a href="{{issue.get_absolute_url}}" class="result-title">{{issue.display_name}}
           {% if issue.printed_cover %}
-          <div class="issue-image"><img src="{{MEDIA_URL}}{{issue.printed_cover}}"/></div>
+          <div class="issue-image">{% thumbnail issue.printed_cover 250x250 crop %}</div>
           {% else %}
           {% if issue.digital_cover %}
-          <div class="issue-image"><img src="{{MEDIA_URL}}{{issue.digital_cover}}"/></div>
+          <div class="issue-image">{% thumbnail issue.digital_cover 250x250 crop %}</div>
           {% endif %}
           {% endif %}
       </a></td>
