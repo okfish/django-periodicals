@@ -57,7 +57,7 @@ class LinkItemInline(generic.GenericTabularInline):
 
 
 class IssueAdmin(admin.ModelAdmin):
-    list_display = ('periodical', 'pub_date', 'title', 'volume', 'issue')
+    list_display = ('digital_cover', 'periodical', 'pub_date', 'title', 'volume', 'issue')
     ordering = ('-pub_date',)
     search_fields = ['title', 'description', 'pub_date']
     save_on_top = True
