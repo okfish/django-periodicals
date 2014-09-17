@@ -9,7 +9,7 @@ from django.contrib.admin.sites import AdminSite
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Series, Article
+from .models import Series, Article, ARTICLE_STATUS_CHOICES
 
 class ArticleCreateUpdateForm(forms.ModelForm):
     
@@ -106,3 +106,9 @@ class ArticleCreateUpdateForm(forms.ModelForm):
         for node in model.get_root_nodes():
             cls.add_subtree(for_node, node, options)
         return options
+    
+
+# Intermediate form for Article admin action change_status
+class ChangeStatusForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    status = forms.ChoiceField(choices=ARTICLE_STATUS_CHOICES, label=_('New status'))

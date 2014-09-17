@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    {{ form }}
+    <p>{% trans "Change status for the articles listed below" %}</p>
+    <ul>{{ items|unordered_list }}</ul>
+    <input type="hidden" name="action" value="change_status" />
+    <input type="submit" name="apply" value="{% trans "Save" %}" />
+</form>
+{% endblock %}

@@ -7,14 +7,16 @@ from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.forms import TypedChoiceField
+from django.shortcuts import render 
+from django.http import HttpResponseRedirect
 
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
 from modeltranslation.admin import TranslationAdmin, TabbedExternalJqueryTranslationAdmin
 
-from .models import Author, Periodical, Issue, Article, Series, LinkItem
-from .forms import ArticleCreateUpdateForm
+from .models import Author, Periodical, Issue, Article, Series, LinkItem, ARTICLE_STATUS_CHOICES
+from .forms import ArticleCreateUpdateForm, ChangeStatusForm
 
 # as there is no GET queries support in the reverse function of Django
 # the build_url picked from http://stackoverflow.com/a/13163095 
@@ -126,9 +128,35 @@ class ArticleAdmin(TabbedExternalJqueryTranslationAdmin):
     inlines = [
         LinkItemInline
     ]
+    actions = ['change_status',]
+    
     def issue_display_name(self, inst):
         return inst.issue.display_name()
     issue_display_name.short_description = _('Issue')
+    
+    def change_status(modeladmin, request, queryset):
+        form = None
+
+        if 'apply' in request.POST:
+            form = ChangeStatusForm(request.POST)
+
+            if form.is_valid():
+                status = form.cleaned_data['status']
+                status_title = [s[1] for s in ARTICLE_STATUS_CHOICES if s[0] == status][0]
+                count = 0
+                for item in queryset:
+                    item.status = status
+                    item.save()
+                    count += 1
+                modeladmin.message_user(request, _(u"New status '%s' applied for %d articles.") \
+                                         % (unicode(status_title), count))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            form = ChangeStatusForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+
+        return render(request, 'periodicals/admin/change_status.html', {'items': queryset,'form': form, 'title':_('Change articles status')})
+    change_status.short_description = _("Change article status")
+    
         
 class SeriesAdmin(TreeAdmin, TabbedExternalJqueryTranslationAdmin):
     form = movenodeform_factory(Series)
