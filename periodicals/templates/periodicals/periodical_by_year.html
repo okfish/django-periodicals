@@ -1,0 +1,93 @@
+{% extends "periodicals/base_periodical.html" %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block title %}{{block.super}} Periodical {{periodical.name}} {% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="/">Home</a>&nbsp;&gt;&nbsp;<a href="{% url 'periodicals_list' %}">Periodicals</a>&nbsp;&gt;&nbsp;{{periodical.name}}</div>
+{% endblock breadcrumbs %}
+
+{% block innercontent %}
+{% block obj_detail %}
+{% if periodical.logo %}
+<div class="periodical-logo">
+  <img src="{{MEDIA_URL}}{{periodical.logo}}"/><br/>
+</div>
+{% endif %}
+<div class="periodical-details">
+  <h1 class="periodical-name">{{periodical.name}}</h1>
+  {% if periodical.publisher %}
+  <p class="periodical-address">
+    {{periodical.publisher}}<br/>
+    {% if periodical.address_1 %}{{periodical.address_1}}<br/>{% endif %}
+    {% if periodical.address_2 %}{{periodical.address_2}}<br/>{% endif %}
+    {% if periodical.city %}{{periodical.city}}, {% endif %}{{periodical.state}} {{periodical.zipcode}}<br/>
+    {% if periodical.country %}{{periodical.country}}{% endif %}
+  </p>
+  {% endif %}
+  <ul class="periodical-contacts">
+    {% if periodical.phone %}
+    <li>Phone: {{periodical.phone}}</li>
+    {% endif %}
+    {% if periodical.email %}
+    <li>Email: {{periodical.email}}</li>
+    {% endif %}
+    {% if periodical.website %}
+    <li>Website: <a href="{{periodical.website}}">{{periodical.website}}</a></li>
+    {% endif %}
+    {% if periodical.blog %}
+    <li>Blog: <a href="{{periodical.blog}}">{{periodical.blog}}</a></li>
+    {% endif %}
+  </ul>
+</div>
+{% endblock obj_detail %}
+{% block obj_online %}
+<p class="periodical-online">
+  <a class="important-link" href="{% url 'periodicals_read_online' periodical.slug %}">Issues and Articles Available Online</a>
+  {% endblock obj_online %}
+  {% if links_enabled %}
+  {% block links %}
+</p><p class="periodical-links">
+  <a class="important-link" href="{% url 'periodicals_links' periodical.slug %}">Issues/Articles with Related Online Blog Posts, Web Pages, Videos</a>
+</p>
+{% endblock links %}
+{% endif %}
+{% block obj_list %}
+<div class="periodical-years">
+  <h2>Years</h2>
+{% regroup object_list by display_year as issue_list %}
+<ul>
+{% for issue in issue_list %}
+    <li><a href="{% url 'periodicals_issue_year' periodical.slug issue.grouper %}" class="result-title"><strong>{{ issue.grouper }}</strong></a>
+    <ul>
+      {% for item in issue.list %}
+          <a href="{{item.get_absolute_url}}" class="result-title">
+          {% if item.printed_cover %}
+          	<img alt="{{item.display_name}}" title="{{item.display_name}}" src="{% thumbnail item.printed_cover 150x150 crop %}"/>
+          {% else %}
+          	{% if item.digital_cover %}
+          	<img alt="{{item.display_name}}" title="{{item.display_name}}" src="{% thumbnail item.digital_cover 150x150 upscale %}"/>
+          	{% else %}
+          		{{item.display_name}}
+          	{% endif %}
+         {% endif %}
+      </a>
+      {% endfor %}
+    </ul>
+    </li>
+{% endfor %}
+</ul>
+</div>
+{% endblock obj_list %}
+{% block obj_browse %}
+<div class="periodical-browse">
+  <h2>Browse</h2>
+  <ul class="related-links">
+    <li><a class="all-authors" href="{% url 'periodicals_authors_list' %}">Authors</a></li>
+    <li><a class="all-series" href="{% url 'periodicals_series_list' periodical.slug %}">Series/Categories</a></li>
+    <li><a class="all-tags" href="{% url 'periodicals_tags' %}">Tags</a></li>
+  </ul>
+</div>
+{% endblock obj_browse %}
+{% endblock innercontent %}
