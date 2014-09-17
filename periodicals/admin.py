@@ -11,6 +11,7 @@ from django.forms import TypedChoiceField
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
+from modeltranslation.admin import TranslationAdmin, TabbedExternalJqueryTranslationAdmin
 
 from .models import Author, Periodical, Issue, Article, Series, LinkItem
 from .forms import ArticleCreateUpdateForm
@@ -81,7 +82,7 @@ class IssueAdmin(admin.ModelAdmin):
     ]
 
 
-class ArticleAdmin(admin.ModelAdmin):
+class ArticleAdmin(TabbedExternalJqueryTranslationAdmin):
     form = ArticleCreateUpdateForm
     list_display = ('id', 'title', 'issue_display_name', 'series', 'organization')
     list_editable = ('title', 'organization',)
@@ -129,7 +130,7 @@ class ArticleAdmin(admin.ModelAdmin):
         return inst.issue.display_name()
     issue_display_name.short_description = _('Issue')
         
-class SeriesAdmin(TreeAdmin):
+class SeriesAdmin(TreeAdmin, TabbedExternalJqueryTranslationAdmin):
     form = movenodeform_factory(Series)
     list_display = ('name', 'articles_count')
     list_per_page = 300
@@ -140,7 +141,7 @@ class SeriesAdmin(TreeAdmin):
     def articles_count(self, inst):
         return '<a href="%s">%s</a>' % (build_url("admin:periodicals_article_changelist", get={'series__id__exact' : int(inst.pk)}) , inst.articles_count)
         return inst.articles_count
-
+    
     articles_count.admin_order_field = 'articles_count'    
     articles_count.allow_tags = True
     articles_count.short_description = "Articles"
