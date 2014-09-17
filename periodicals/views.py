@@ -132,7 +132,28 @@ class PeriodicalDetail(ArchiveIndexView):
         context['links_enabled'] = settings.PERIODICALS_LINKS_ENABLED
         return context
 
-
+class PeriodicalDetailExtended(ArchiveIndexView):
+    date_list_period = 'month'
+    date_field = 'pub_date'
+    allow_empty = False
+    allow_future = True
+    queryset = Issue.objects.all()
+    template_name = 'periodicals/periodical_by_year.html'
+    
+    def get_queryset(self):
+        periodical_slug = self.kwargs['periodical_slug']
+        periodical = get_object_or_404(Periodical, slug=periodical_slug)
+        self.periodical = periodical
+        qs = super(PeriodicalDetailExtended, self).get_queryset().\
+            filter(periodical=periodical)
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(PeriodicalDetailExtended, self).get_context_data(**kwargs)
+        context['periodical'] = self.periodical
+        context['object_list'] = self.get_queryset()
+        return context
+    
 class IssueYear(YearArchiveView):
     queryset = Issue.objects.all()
     date_field = 'pub_date'
