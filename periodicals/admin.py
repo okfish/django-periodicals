@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import urllib
+from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.contrib import admin
 from django.contrib.contenttypes import generic
@@ -12,6 +14,19 @@ from treebeard.forms import movenodeform_factory
 
 from .models import Author, Periodical, Issue, Article, Series, LinkItem
 from .forms import ArticleCreateUpdateForm
+
+# as there is no GET queries support in the reverse function of Django
+# the build_url picked from http://stackoverflow.com/a/13163095 
+def build_url(*args, **kwargs):
+    """
+    Builds an url with get parameters passed.
+    Thanks http://stackoverflow.com/a/13163095
+    """
+    get = kwargs.pop('get', {})
+    url = reverse(*args, **kwargs)
+    if get:
+        url += '?' + urllib.urlencode(get)
+    return url
 
 class AuthorAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':
@@ -123,10 +138,14 @@ class SeriesAdmin(TreeAdmin):
         return Series.objects.annotate(articles_count=Count('article'))
 
     def articles_count(self, inst):
+        return '<a href="%s">%s</a>' % (build_url("admin:periodicals_article_changelist", get={'series__id__exact' : int(inst.pk)}) , inst.articles_count)
         return inst.articles_count
 
     articles_count.admin_order_field = 'articles_count'    
-
+    articles_count.allow_tags = True
+    articles_count.short_description = "Articles"
+ 
+    
 admin.site.register(LinkItem, LinkItemAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(Periodical, PeriodicalAdmin)
