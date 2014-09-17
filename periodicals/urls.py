@@ -9,7 +9,8 @@ from haystack.views import search_view_factory
 from .views import (AuthorList, AuthorDetail,
                     ArticleDetail, ArticleTags,
                     IssueYear, IssueDetail,
-                    PeriodicalList, PeriodicalDetail,
+                    PeriodicalList, 
+                    PeriodicalDetailExtended as PeriodicalDetail,
                     SeriesList, SeriesDetail,
                     FacetedSearchView)
 
