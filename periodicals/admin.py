@@ -168,8 +168,7 @@ class SeriesAdmin(TreeAdmin, TabbedExternalJqueryTranslationAdmin):
 
     def articles_count(self, inst):
         return '<a href="%s">%s</a>' % (build_url("admin:periodicals_article_changelist", get={'series__id__exact' : int(inst.pk)}) , inst.articles_count)
-        return inst.articles_count
-    
+
     articles_count.admin_order_field = 'articles_count'    
     articles_count.allow_tags = True
     articles_count.short_description = "Articles"
