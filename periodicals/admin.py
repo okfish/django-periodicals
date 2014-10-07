@@ -16,7 +16,7 @@ from treebeard.forms import movenodeform_factory
 from modeltranslation.admin import TranslationAdmin, TabbedExternalJqueryTranslationAdmin
 
 from .models import Author, Periodical, Issue, Article, Series, LinkItem, ARTICLE_STATUS_CHOICES
-from .forms import ArticleCreateUpdateForm, ChangeStatusForm
+from .forms import ArticleCreateUpdateForm, ChangeStatusForm, ChangeSeriesForm
 
 # as there is no GET queries support in the reverse function of Django
 # the build_url picked from http://stackoverflow.com/a/13163095 
@@ -128,7 +128,7 @@ class ArticleAdmin(TabbedExternalJqueryTranslationAdmin):
     inlines = [
         LinkItemInline
     ]
-    actions = ['change_status',]
+    actions = ['change_status', 'change_series']
     
     def issue_display_name(self, inst):
         return inst.issue.display_name()
@@ -156,6 +156,30 @@ class ArticleAdmin(TabbedExternalJqueryTranslationAdmin):
 
         return render(request, 'periodicals/admin/change_status.html', {'items': queryset,'form': form, 'title':_('Change articles status')})
     change_status.short_description = _("Change article status")
+    
+    def change_series(modeladmin, request, queryset):
+        form = None
+
+        if 'apply' in request.POST:
+            form = ChangeSeriesForm(request.POST)
+
+            if form.is_valid():
+                series_id = form.cleaned_data['series']
+                series = Series.objects.get(pk=series_id)
+                series_title = series.full_name
+                count = 0
+                for item in queryset:
+                    item.series = series
+                    item.save()
+                    count += 1
+                modeladmin.message_user(request, _(u"%d articles now in the series '%s'") \
+                                         % (count, unicode(series_title)))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            form = ChangeSeriesForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+
+        return render(request, 'periodicals/admin/change_series.html', {'items': queryset,'form': form, 'title':_('Change articles series')})
+    change_series.short_description = _("Change article series")
     
         
 class SeriesAdmin(TreeAdmin, TabbedExternalJqueryTranslationAdmin):
