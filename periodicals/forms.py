@@ -133,7 +133,18 @@ class ChangeSeriesForm(forms.Form):
                                             initial, error_class,
                                             label_suffix, empty_permitted)
         for_node = Series.get_first_root_node()
-        choices = mk_dropdown_tree(Series, None)
+        choices = mk_dropdown_tree(Series, for_node)
         self.fields['series'].choices = choices
         self.fields['series'].selected_choices = for_node
         
+# Intermediate form for Article admin action merge_series
+# for the moment just inherits ChangeSeriesForm but can be extended
+class MergeSeriesForm(ChangeSeriesForm):
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None,
+             initial=None, error_class=ErrorList, label_suffix=':',
+             empty_permitted=False, instance=None):
+        super(MergeSeriesForm, self).__init__(data, files, auto_id, prefix,
+                                            initial, error_class,
+                                            label_suffix, empty_permitted)
+        self.fields['series'].label = _("to the series")
+    

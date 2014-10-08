@@ -16,7 +16,7 @@ from treebeard.forms import movenodeform_factory
 from modeltranslation.admin import TranslationAdmin, TabbedExternalJqueryTranslationAdmin
 
 from .models import Author, Periodical, Issue, Article, Series, LinkItem, ARTICLE_STATUS_CHOICES
-from .forms import ArticleCreateUpdateForm, ChangeStatusForm, ChangeSeriesForm
+from .forms import ArticleCreateUpdateForm, ChangeStatusForm, ChangeSeriesForm, MergeSeriesForm
 
 # as there is no GET queries support in the reverse function of Django
 # the build_url picked from http://stackoverflow.com/a/13163095 
@@ -186,16 +186,51 @@ class SeriesAdmin(TreeAdmin, TabbedExternalJqueryTranslationAdmin):
     form = movenodeform_factory(Series)
     list_display = ('name', 'articles_count')
     list_per_page = 300
-    
+    actions = [#'change_status', 
+               'merge_series']
+ 
     def queryset(self, request):
         return Series.objects.annotate(articles_count=Count('article'))
 
     def articles_count(self, inst):
         return '<a href="%s">%s</a>' % (build_url("admin:periodicals_article_changelist", get={'series__id__exact' : int(inst.pk)}) , inst.articles_count)
 
+    def merge_series(modeladmin, request, queryset):
+        form = None
+
+        if 'apply' in request.POST:
+            form = MergeSeriesForm(request.POST)
+
+            if form.is_valid():
+                series_id = form.cleaned_data['series']
+                series = Series.objects.get(pk=series_id)
+                series_title = series.full_name
+                count = 0
+                articles_qs = None
+                for item in queryset:
+                    articles_qs = Article.objects.filter(series=item.id)
+                    for article in articles_qs:
+                        
+                        article.series = series
+                        article.save()
+                        count += 1
+                modeladmin.message_user(request, _(u"%d articles now in the series '%s'") \
+                                         % (count, unicode(series_title)))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            selected_items = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+            form = MergeSeriesForm(initial={'_selected_action': selected_items, 
+                                             'series' : selected_items[0]
+                                             }
+                                    )
+
+        return render(request, 'periodicals/admin/merge_series.html', {'items': queryset,'form': form, 'title':_('Move articles to another series')})
+    
+    merge_series.short_description = _("Move all articles of the selected series to another one")
+
     articles_count.admin_order_field = 'articles_count'    
     articles_count.allow_tags = True
-    articles_count.short_description = "Articles"
+    articles_count.short_description = _("Articles")
  
     
 admin.site.register(LinkItem, LinkItemAdmin)

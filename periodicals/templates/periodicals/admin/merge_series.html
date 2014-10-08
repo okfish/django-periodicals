@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    <p>{% trans "Wanging! ALL articles in the series listed below" %}</p>
+    <ul>{{ items|unordered_list }}</ul>
+    <p>{% trans "will be moved " %}
+    {{ form }}
+    </p>
+    <p>{% trans "You can't undo this action" %}</p>
+    <input type="hidden" name="action" value="merge_series" />
+    <input type="submit" name="apply" value="{% trans "Save" %}" />
+</form>
+{% endblock %}
