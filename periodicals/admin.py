@@ -148,8 +148,8 @@ class ArticleAdmin(TabbedExternalJqueryTranslationAdmin):
                     item.status = status
                     item.save()
                     count += 1
-                modeladmin.message_user(request, _(u"New status '%s' applied for %d articles.") \
-                                         % (unicode(status_title), count))
+                modeladmin.message_user(request, _(u"New status '%(status)s' applied for %(count)d articles.") \
+                                         % { 'status' : unicode(status_title), 'count': count })
                 return HttpResponseRedirect(request.get_full_path())
         if not form:
             form = ChangeStatusForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
@@ -172,8 +172,8 @@ class ArticleAdmin(TabbedExternalJqueryTranslationAdmin):
                     item.series = series
                     item.save()
                     count += 1
-                modeladmin.message_user(request, _(u"%d articles now in the series '%s'") \
-                                         % (count, unicode(series_title)))
+                modeladmin.message_user(request, _(u"%(count)d articles now in the series '%(series)s'") \
+                                         % { 'series' : unicode(series_title), 'count': count })
                 return HttpResponseRedirect(request.get_full_path())
         if not form:
             form = ChangeSeriesForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
@@ -214,8 +214,8 @@ class SeriesAdmin(TreeAdmin, TabbedExternalJqueryTranslationAdmin):
                         article.series = series
                         article.save()
                         count += 1
-                modeladmin.message_user(request, _(u"%d articles now in the series '%s'") \
-                                         % (count, unicode(series_title)))
+                modeladmin.message_user(request, _(u"%(count)d articles now in the series '%(series)s'") \
+                                         % { 'series' : unicode(sseries_title), 'count': count })
                 return HttpResponseRedirect(request.get_full_path())
         if not form:
             selected_items = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
